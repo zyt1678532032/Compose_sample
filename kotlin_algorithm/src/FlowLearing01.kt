@@ -1,9 +1,3 @@
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
-import java.util.HashMap
 
 
 fun main() {
