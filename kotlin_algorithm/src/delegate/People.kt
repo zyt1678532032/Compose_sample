@@ -12,5 +12,5 @@ class People(
 }
 
 fun main() {
-    println((People("张彦通", 23, "男").phone as Phone).name)
+    println(People("张彦通", 23, "男").phone )
 }
