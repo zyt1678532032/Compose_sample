@@ -3,7 +3,12 @@ package com.example.test.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -32,10 +37,13 @@ import com.example.test.R
 @Preview(showSystemUi = true)
 @Composable
 fun ShowWeatherInfo() {
+    val scrollState = rememberScrollState()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
     ) {
         Box(
             modifier = Modifier.background(Color.Black),
@@ -46,8 +54,8 @@ fun ShowWeatherInfo() {
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth(1f)
-                    .fillMaxHeight(0.85f), // todo: 9/1 这里换为fillMaxWidth()会出现问题
-                contentScale = ContentScale.FillHeight // 填充高度
+                    .height(500.dp),
+                contentScale = ContentScale.FillBounds // 填充高度
             )
             Column(
                 verticalArrangement = Arrangement.Center, // 内容垂直位置
@@ -81,17 +89,20 @@ fun ShowWeatherInfo() {
         }
         Spacer(modifier = Modifier.height(8.dp))
         PredictItem()
+        Spacer(modifier = Modifier.height(8.dp))
+        LifeIndex()
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
 /**
  *  预报元素
  */
-@Preview
 @Composable
 fun PredictItem() {
     Card(
-        modifier = Modifier.fillMaxWidth(0.9f),
+        modifier = Modifier
+            .fillMaxWidth(0.9f),
         elevation = 18.dp,
         shape = RoundedCornerShape(4.dp)
     ) {
@@ -108,20 +119,30 @@ fun PredictItem() {
                 )
             )
             Spacer(modifier = Modifier.height(20.dp))
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "2019-10-25")
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_cloudy),
-                    contentDescription = null
-                )
-                Text(text = "多云")
-                Text(text = "4--13℃")
+            repeat(4) {
+                WeatherInfo()
+                Spacer(modifier = Modifier.height(15.dp))
             }
-            Spacer(modifier = Modifier.height(8.dp))
         }
+    }
+}
+
+/**
+ * 详细天气
+ */
+@Composable
+fun WeatherInfo() {
+    Row(
+        horizontalArrangement = Arrangement.SpaceAround,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(text = "2019-10-25")
+        Icon(
+            painter = painterResource(id = R.drawable.ic_cloudy),
+            contentDescription = null
+        )
+        Text(text = "多云")
+        Text(text = "4--13℃")
     }
 }
 
