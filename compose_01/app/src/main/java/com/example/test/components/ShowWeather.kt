@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -120,6 +121,81 @@ fun PredictItem() {
                 Text(text = "4--13℃")
             }
             Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
+/**
+ * 生活指数
+ */
+@Preview
+@Composable
+fun LifeIndex() {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(0.9f),
+        shape = RoundedCornerShape(5.dp),
+        elevation = 18.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+        ) {
+            Text(text = "生活指数", style = MaterialTheme.typography.h6)
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                LifeIndexItem()
+                LifeIndexItem()
+            }
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                LifeIndexItem()
+                LifeIndexItem()
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun LifeIndexItem() {
+    Row(
+        Modifier
+            .background(Color.White)
+            .padding(start = 15.dp, end = 15.dp, top = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_ultraviolet),
+            contentDescription = null,
+            modifier = Modifier.size(25.dp),
+            tint = Color.Blue
+        )
+        Spacer(modifier = Modifier.width(15.dp))
+        Column(
+            modifier = Modifier.padding(start = 5.dp)
+        ) {
+            Text(
+                text = "感冒",
+                style = TextStyle(
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 10.sp
+                )
+            )
+            Text(
+                text = "及易发",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp
+                )
+            )
         }
     }
 }
