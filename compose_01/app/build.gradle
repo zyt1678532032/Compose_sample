@@ -1,8 +1,9 @@
 plugins {
     id 'com.android.application' //
     id 'kotlin-android'
+    id 'kotlin-parcelize'
     id 'kotlin-kapt' //Kotlin annotation processing tool
-    id 'kotlin-android-extensions' //节省findviewbyid(), 不需要添加任何额外代码，也不影响任何运行时体验
+    // id 'kotlin-android-extensions' //节省findviewbyid(), 不需要添加任何额外代码，也不影响任何运行时体验
 }
 
 android {
@@ -58,7 +59,9 @@ dependencies {
     implementation("androidx.room:room-ktx:$room_version")
     // Kotlin annotation processing tool 注解处理器插件(和annotationProcessor的区别是什么呢)
     kapt "androidx.room:room-compiler:$room_version"
-    //Compose
+    // Compose 导航
+    implementation("androidx.navigation:navigation-compose:2.4.0-alpha05")
+    // Compose
     implementation 'androidx.compose.ui:ui:1.0.0'
     // Tooling support (Previews, etc.)
     implementation 'androidx.compose.ui:ui-tooling:1.0.0'

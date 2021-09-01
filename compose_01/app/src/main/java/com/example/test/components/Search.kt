@@ -1,5 +1,6 @@
 package com.example.test.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,11 +9,13 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.test.R
 import com.example.test.components.theme.WeatherTypography
 
 @Composable
@@ -21,8 +24,9 @@ fun SearchWeatherByAddress() {
     var address by remember {
         mutableStateOf("")
     }
+
     Scaffold {
-        Column {
+        Column(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 value = address,
                 onValueChange = {
@@ -34,13 +38,18 @@ fun SearchWeatherByAddress() {
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.fillMaxWidth()
             )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(4) {
-                    searchItem()
-                    Spacer(modifier = Modifier.height(10.dp))
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.bg_place),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize()
+                )
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(4) {
+                        searchItem()
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
                 }
             }
         }
@@ -80,11 +89,4 @@ fun searchItem() {
             )
         }
     }
-}
-
-@Preview
-@Composable
-fun test() {
-
-
 }
