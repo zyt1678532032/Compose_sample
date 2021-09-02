@@ -1,10 +1,12 @@
 package com.example.mylibrary
 
-const val kotlin_version = "1.5.30"
+const val kotlin_version = "1.5.21"
+const val gradle_version = "7.0.0"
 
-object Plugins{
+object Plugins {
     // gradle插件
-    const val gradle =  "com.android.tools.build:gradle:7.0.0"
+    const val gradle = "com.android.tools.build:gradle:$gradle_version"
+
     // kotlin gradle插件支持
     const val kotlin_gradle = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 }
@@ -68,6 +70,7 @@ class Libs {
         }
 
     }
+
     // kotlin 反射
     object Koltin {
         private const val version = "1.5.10"

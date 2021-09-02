@@ -128,7 +128,6 @@ fun PredictItem() {
             Spacer(modifier = Modifier.height(20.dp))
             repeat(4) {
                 WeatherInfo()
-                Spacer(modifier = Modifier.height(15.dp))
             }
         }
     }
@@ -151,6 +150,7 @@ fun WeatherInfo() {
         Text(text = "多云")
         Text(text = "4--13℃")
     }
+    Spacer(modifier = Modifier.height(15.dp))
 }
 
 /**

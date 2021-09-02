@@ -7,7 +7,7 @@ plugins {
 }
 apply plugin: 'kotlin-android'
 
-import com.example.mylibrary.Libs
+import com.example.mylibrary.*
 
 android {
     compileSdk 30
@@ -43,6 +43,11 @@ android {
     kotlinOptions {
         jvmTarget = '11'
     }
+    // compose编译操作
+    composeOptions {
+        // compose_compiler
+        kotlinCompilerExtensionVersion '1.0.2'
+    }
 }
 
 /**
@@ -54,6 +59,8 @@ repositories {
 }
 
 dependencies {
+    // 引入当前项目的library
+    implementation project(":library")
     //retrofit
     implementation Libs.Retrofit.retrofit
     implementation Libs.Retrofit.converter_gson
@@ -87,7 +94,8 @@ dependencies {
     implementation Libs.Androidx.Activity.appcompat
     implementation Libs.Androidx.Core.core_ktx
     implementation Libs.Koltin.reflect
-    // implementation 'com.google.android.material:material:1.4.0'
+    // 包含主题和组件等
+    implementation 'com.google.android.material:material:1.4.0'
     testImplementation Libs.Test.junit
 
 }

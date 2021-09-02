@@ -1,3 +1,4 @@
 // 简洁的compose项目
 rootProject.name = "compose_simple"
 include ':app'
+include ':library'
