@@ -24,7 +24,6 @@ fun SearchWeatherByAddress() {
     var address by remember {
         mutableStateOf("")
     }
-
     Scaffold {
         Column(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
@@ -36,8 +35,11 @@ fun SearchWeatherByAddress() {
                     Text(text = "输入地址")
                 },
                 shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 10.dp)
             )
+            Spacer(modifier = Modifier.height(20.dp))
             Box(modifier = Modifier.fillMaxWidth()) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Image(

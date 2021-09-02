@@ -1,7 +1,22 @@
-
-
 fun main() {
-    println(People_("zyt") + People_("shx"))
+    // println(People_("zyt") + People_("shx"))
+    // Map: key值唯一,下面最后一个Apple会覆盖前面key相同的value
+    // val mapOf = mapOf("Apple" to 1, "Orange" to 2, "Apple" to 3)
+    val mapOf = mapOf("Apple" to 3, "Orange" to 2, "Apple2" to 3)
+    val maxOfWithOrNull = mapOf.maxOfOrNull {
+        it.key.length
+    }
+    mapOf.forEach{
+        println(it.value)
+    }
+    println(mapOf.count {
+        // 输出value等于3的元素有多少
+        if (it.value == 3) {
+            return@count true
+        }
+        return@count false
+    })
+    println(maxOfWithOrNull)
 }
 
 fun twoSum(nums: IntArray, target: Int): IntArray {
@@ -26,12 +41,13 @@ class People_(val name: String) {
 
 }
 
-class A{
+class A {
     val name: String? = null
 
     fun funcOfA(block: B.() -> Unit) {
         block(B())
     }
+
     fun testFunc() {
         funcOfA {
             // 调用指定实例
@@ -41,4 +57,5 @@ class A{
         }
     }
 }
+
 class B

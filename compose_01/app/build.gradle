@@ -5,6 +5,9 @@ plugins {
     id 'kotlin-kapt' //Kotlin annotation processing tool
     // id 'kotlin-android-extensions' //节省findviewbyid(), 不需要添加任何额外代码，也不影响任何运行时体验
 }
+apply plugin: 'kotlin-android'
+
+import com.example.mylibrary.Libs
 
 android {
     compileSdk 30
@@ -42,40 +45,50 @@ android {
     }
 }
 
-dependencies {
-    def room_version = "2.3.0"
-    //retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.6.2")
-    //kotlinx-coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1")
-    // lifecycle
-    implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
-    // room
-    implementation("androidx.room:room-runtime:$room_version")
-    // optional - Kotlin Extensions and Coroutines support for Room
-    implementation("androidx.room:room-ktx:$room_version")
-    // Kotlin annotation processing tool 注解处理器插件(和annotationProcessor的区别是什么呢)
-    kapt "androidx.room:room-compiler:$room_version"
-    // Compose 导航
-    implementation("androidx.navigation:navigation-compose:2.4.0-alpha05")
-    // Compose
-    implementation 'androidx.compose.ui:ui:1.0.0'
-    // Tooling support (Previews, etc.)
-    implementation 'androidx.compose.ui:ui-tooling:1.0.0'
-    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
-    implementation 'androidx.compose.foundation:foundation:1.0.0'
-    // Material Design
-    implementation 'androidx.compose.material:material:1.0.0'
-    // Material design icons
-    implementation 'androidx.compose.material:material-icons-core:1.0.0'
-    implementation 'androidx.compose.material:material-icons-extended:1.0.0-rc02'
-    // Integration with activities
-    implementation 'androidx.activity:activity-compose:1.3.0'
-    implementation 'androidx.core:core-ktx:1.5.0'
-    implementation 'com.google.android.material:material:1.4.0'
-    testImplementation 'junit:junit:4.12'
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.5.10"
+/**
+ * 注:需要添加一下代码,否则依赖导不进去
+ */
+repositories {
+    google()
+    mavenCentral()
 }
+
+dependencies {
+    //retrofit
+    implementation Libs.Retrofit.retrofit
+    implementation Libs.Retrofit.converter_gson
+    //kotlinx-coroutines
+    implementation Libs.Coroutines.core
+    implementation Libs.Coroutines.android
+    // lifecycle
+    implementation Libs.Lifecycle.extensions
+    implementation Libs.Lifecycle.livedata_ktx
+    // room
+    implementation Libs.Room.runtime
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation Libs.Room.ktx
+    // Kotlin annotation processing tool 注解处理器插件(和annotationProcessor的区别是什么呢)
+    kapt Libs.Kapt.room_compiler
+    // Compose 导航
+    implementation Libs.Compose.navigation
+    // Compose
+    implementation Libs.Compose.ui
+    // Tooling support (Previews, etc.)
+    implementation Libs.Compose.ui_tooling
+    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
+    implementation Libs.Compose.foundation
+    // Material Design
+    implementation Libs.Compose.material
+    // Material design icons
+    implementation Libs.Compose.material_icons_core
+    implementation Libs.Compose.material_icons_extended
+    // Integration with activities
+    implementation Libs.Androidx.Activity.activityCompose
+    implementation Libs.Androidx.Activity.appcompat
+    implementation Libs.Androidx.Core.core_ktx
+    implementation Libs.Koltin.reflect
+    // implementation 'com.google.android.material:material:1.4.0'
+    testImplementation Libs.Test.junit
+
+}
+
