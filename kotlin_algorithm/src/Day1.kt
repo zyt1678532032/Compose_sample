@@ -33,8 +33,10 @@ const val test3 = "Address" // address
 const val test4 = "validHTTPRequest" // valid_http_request
 
 const val test5 = "validHTTPRequestTEST" // valid_http_request_test
-const val test6 = "ValidHTTPMyRequest" // Valid_http_my_request
-const val test7 = "ValidHTTPOfMyRequest" // Valid_http_my_request
+const val test6 = "ValidHTTPMyRequest" // valid_http_my_request
+const val test7 = "ValidHTTPOfMyRequest" // valid_http_of_my_request
+const val test8 = "ValidHTTPOfMyRequestT" // valid_http_of_my_request_t
+const val test9 = "AgeHaE" // age_ha_e
 
 fun changeString(string: String) {
     if (string.isNotEmpty()) {
@@ -51,7 +53,9 @@ fun changeString(string: String) {
         for (i in 1 until string.length) {
             // 大写时进行判断
             if (string[i].isUpperCase()) {
-                if (i + 1 >= string.length) { // 最后一个
+                if (i + 1 >= string.length && string[i - 1].isLowerCase()) { // 最后一个,它的前一个如果为小写,则添加_
+                    stringChanged += "_${string[i].lowercase()}"
+                } else if (i + 1 >= string.length && string[i - 1].isUpperCase()) {// 最后一个
                     stringChanged += string[i].lowercase()
                 } else {
                     // 不是最后一个
@@ -89,5 +93,7 @@ fun main() {
     changeString(test5)
     changeString(test6)
     changeString(test7)
+    changeString(test8)
+    changeString(test9)
     changeString("")
 }
