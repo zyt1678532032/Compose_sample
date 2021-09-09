@@ -2,7 +2,7 @@ import com.example.mylibrary.Libs
 
 plugins {
     id("com.android.application") //
-    id("kotlin-android")
+    id("kotlin-android") apply true
     id("kotlin-parcelize")
     id("kotlin-kapt") //Kotlin annotation processing tool
     // id 'kotlin-android-extensions' //节省findViewById(), 不需要添加任何额外代码，也不影响任何运行时体验
@@ -10,6 +10,14 @@ plugins {
 
 android {
     compileSdk = 30
+
+    lint {
+        isAbortOnError = false        // true by default
+        isCheckAllWarnings = false
+        isCheckReleaseBuilds = false
+        isIgnoreWarnings = true       // false by default
+        isQuiet = true                // false by default
+    }
 
     defaultConfig {
         applicationId = "com.example.test"
@@ -100,5 +108,6 @@ dependencies {
     // 包含主题和组件等
     implementation("com.google.android.material:material:1.4.0")
     testImplementation(Libs.Test.junit)
+
 }
 
