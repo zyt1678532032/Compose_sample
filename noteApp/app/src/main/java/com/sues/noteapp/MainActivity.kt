@@ -92,7 +92,11 @@ fun Search(navController: NavHostController) {
             }
         }
     ) {
-        Column() {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             OutlinedTextField(
                 value = searchText,
                 onValueChange = {
@@ -106,8 +110,7 @@ fun Search(navController: NavHostController) {
                 },
                 label = { Text(text = "Search notes") },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 3.dp),
+                    .fillMaxWidth(0.96f),
             )
 
         }

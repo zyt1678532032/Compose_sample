@@ -70,7 +70,8 @@ fun addNoteContent(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
     ) {
         OutlinedTextField(
             value = title,
@@ -78,7 +79,7 @@ fun addNoteContent(
                 title = it
             },
             label = { Text(text = "Note Title") },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(0.96f),
             maxLines = 1
         )
         Row(
