@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.LibraryDefaultConfig
+
 plugins {
     id("com.android.library")
     id("kotlin-android")
@@ -54,13 +56,13 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
 }
 
-var com.android.build.api.dsl.LibraryDefaultConfig.versionCode: Int?
+var LibraryDefaultConfig.versionCode: Int?
     get() = null
     set(value) {
         buildConfigField("int", "versionCode", "$value")
     }
 
-var com.android.build.api.dsl.LibraryDefaultConfig.versionName: String?
+var LibraryDefaultConfig.versionName: String?
     get() = null
     set(value) {
         buildConfigField("String", "versionName", "\"$value\"")
