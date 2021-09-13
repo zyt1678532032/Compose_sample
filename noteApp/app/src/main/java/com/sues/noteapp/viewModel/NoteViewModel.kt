@@ -14,23 +14,21 @@ class NoteViewModel: ViewModel() {
         _noteList.value = _noteList.value!! + listOf(note)
     }
 }
+
 val notes = listOf(
     Note(
-        id = 1,
         title = "title1",
         subTitle = "subTitle",
         noteText = "的撒hi大使馆蒂萨dsada",
         dateTime = "2021 9-13"
     ),
     Note(
-        id = 2,
         title = "title1",
         subTitle = "subTitle",
         noteText = "的撒hi大使馆蒂萨dsada\ndsadasddasa爆单赛不带去",
         dateTime = "2021 9-13"
     ),
     Note(
-        id = 3,
         title = "title1",
         subTitle = "subTitle",
         noteText = "的撒hi大使馆蒂萨dsada\n撒hi大使馆蒂萨dsada\n" +

@@ -9,6 +9,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -17,11 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -29,23 +33,21 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.sues.noteapp.component.addNoteContent
-import com.sues.noteapp.component.bottomAppBar
-import com.sues.noteapp.component.topAppbar
+import com.sues.noteapp.component.*
 import com.sues.noteapp.entity.Note
 import com.sues.noteapp.ui.theme.*
 import com.sues.noteapp.viewModel.NoteViewModel
 import kotlinx.coroutines.launch
+import java.lang.Math.ceil
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.ceil
 
 class MainActivity : ComponentActivity() {
 
     private val noteViewModel by viewModels<NoteViewModel>()
     private var dataBase: NoteDataBase? = null
 
-    @OptIn(ExperimentalFoundationApi::class)
-    @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // dataBase = NoteDataBase.getDataBase(applicationContext)
@@ -58,8 +60,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@ExperimentalFoundationApi
-@ExperimentalMaterialApi
 @Composable
 fun NavGraph(noteViewModel: NoteViewModel) {
     val navController = rememberNavController()
@@ -73,8 +73,6 @@ fun NavGraph(noteViewModel: NoteViewModel) {
     }
 }
 
-@ExperimentalFoundationApi
-@ExperimentalMaterialApi
 @Composable
 fun Search(navController: NavHostController, noteViewModel: NoteViewModel) {
 
@@ -129,16 +127,12 @@ fun Search(navController: NavHostController, noteViewModel: NoteViewModel) {
                 modifier = Modifier
                     .fillMaxWidth(0.96f),
             )
-            // 笔记内容
-            LazyVerticalGrid(
-                cells = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxWidth(0.96f),
-                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 5.dp)
+            StaggeredVerticalGrid(
+                maxColumnWidth = 200.dp,
+                modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp)
             ) {
-                // Note 列表元素
-                items(noteViewModel.noteList.value!!.size) { index ->
-                    //
-                    noteItem(noteViewModel.noteList.value!![index])
+                repeat(noteViewModel.noteList.value!!.size) {
+                    noteItem(noteViewModel.noteList.value!![it])
                 }
             }
         }
@@ -319,7 +313,7 @@ fun noteItem(note: Note) {
         elevation = 0.dp,
         modifier = Modifier
             .alpha(1f)
-            .padding(horizontal = 4.dp)
+            .padding(horizontal = 4.dp, vertical = 4.dp)
     ) {
         Card(
             backgroundColor = colorPrimaryDark,
@@ -336,3 +330,4 @@ fun noteItem(note: Note) {
         }
     }
 }
+
