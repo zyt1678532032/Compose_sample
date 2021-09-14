@@ -5,10 +5,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.sues.noteapp.entity.Note
 
-class NoteViewModel: ViewModel() {
+class NoteViewModel : ViewModel() {
 
     private val _noteList = MutableLiveData<List<Note>>(notes)
     var noteList: LiveData<List<Note>> = _noteList
+
+    var colorIsShow = MutableLiveData<MutableList<Boolean>>()
 
     fun addNote(note: Note) {
         _noteList.value = _noteList.value!! + listOf(note)
