@@ -6,9 +6,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,10 +47,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.ceil
 import androidx.compose.runtime.livedata.*
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.compose.navArgument
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.navigation
+import kotlinx.coroutines.CoroutineScope
 
 class MainActivity : ComponentActivity() {
 
@@ -57,6 +64,7 @@ class MainActivity : ComponentActivity() {
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        installSplashScreen()
         // dataBase = NoteDataBase.getDataBase(applicationContext)
 
         setContent {
@@ -76,7 +84,9 @@ fun NavGraph(noteViewModel: NoteViewModel) {
         composable("search") {
             Search(navController = navController, noteViewModel = noteViewModel)
         }
-        composable("addNote") {
+        composable(
+            route = "addNote",
+        ) {
             AddNote(navController = navController, noteViewModel = noteViewModel)
         }
     }
@@ -84,7 +94,6 @@ fun NavGraph(noteViewModel: NoteViewModel) {
 
 @Composable
 fun Search(navController: NavHostController, noteViewModel: NoteViewModel) {
-
     var searchText by remember {
         mutableStateOf("")
     }
@@ -99,7 +108,7 @@ fun Search(navController: NavHostController, noteViewModel: NoteViewModel) {
             }
         },
         bottomBar = {
-            bottomAppBar()
+            searchBottomAppBar()
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -119,44 +128,12 @@ fun Search(navController: NavHostController, noteViewModel: NoteViewModel) {
             }
         }
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            OutlinedTextField(
-                value = searchText,
-                onValueChange = {
-                    searchText = it
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_search),
-                        contentDescription = null,
-                        tint = colorSearchIcon
-                    )
-                },
-                label = {
-                    Text(
-                        text = "Search notes",
-                        color = colorTextHint,
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth(0.96f),
-                colors = TextFieldDefaults.outlinedTextFieldColors(textColor = colorWhite)
-            )
-            StaggeredVerticalGrid(
-                maxColumnWidth = 200.dp,
-                modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp)
-            ) {
-                repeat(noteViewModel.noteList.value!!.size) {
-                    noteItem(noteViewModel.noteList.value!![it])
-                }
-            }
+        searchContent(searchText, noteViewModel.noteList.value!!) {
+            searchText = it
         }
     }
 }
+
 
 @ExperimentalMaterialApi
 @Composable
@@ -192,9 +169,13 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
     var colorState5 by remember {
         mutableStateOf(false)
     }
-
+    // 选中颜色
+    var selectedColor by remember {
+        mutableStateOf(Color.Black)
+    }
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
+
     BottomSheetScaffold(
         sheetContent = {
             Box(
@@ -229,6 +210,8 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                             colorState4 = false
                             colorState5 = false
                             colorState1 = true
+                            selectedColor = colorPrimaryDark
+
                         }
                     }) {
 
@@ -254,6 +237,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                             colorState4 = false
                             colorState5 = false
                             colorState2 = true
+                            selectedColor = colorNoteColor2
                         }
                     }) {
                         Icon(
@@ -278,6 +262,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                             colorState4 = false
                             colorState5 = false
                             colorState3 = true
+                            selectedColor = colorNoteColor2
 
                         }
                     }) {
@@ -303,7 +288,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                             colorState4 = false
                             colorState5 = false
                             colorState4 = true
-
+                            selectedColor = colorNoteColor4
                         }
                     }) {
                         Icon(
@@ -328,7 +313,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                             colorState4 = false
                             colorState5 = false
                             colorState5 = true
-
+                            selectedColor = colorNoteColor5
                         }
                     }) {
                         Icon(
@@ -347,7 +332,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                     Text(
                         text = "选择颜色",
                         fontWeight = FontWeight.Bold,
-                        color = colorWhite
+                        color = colorWhite,
                     )
                 }
             }
@@ -368,99 +353,25 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
             }
         },
         topBar = {
-            TopAppBar {
-                Row(
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = {
-                        navController.navigate(
-                            route = "search",
-                            navOptions = NavOptions.Builder()
-                                .setPopUpTo(route = "search", inclusive = true)
-                                .build()
-                        )
-                    }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_back),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding(start = 13.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.fillMaxWidth(0.85f))
-                    IconButton(
-                        onClick = {
-                            if (noteContent.isEmpty()) {
-                                scope.launch {
-                                    scaffoldState.snackbarHostState.showSnackbar(
-                                        message = "笔记内容不能为空!"
-                                    )
-                                }
-                            } else {
-                                noteViewModel.addNote(
-                                    Note(
-                                        id = 1,
-                                        title = title,
-                                        subTitle = subTitle,
-                                        noteText = noteContent,
-                                        dateTime = dateTime
-                                    )
-                                )
-                                navController.navigate(
-                                    route = "search",
-                                    navOptions = NavOptions.Builder()
-                                        .setPopUpTo(route = "search", inclusive = true)
-                                        .build()
-                                )
-                                Log.i("addNote", noteViewModel.noteList.value!!.size.toString())
-
-                            }
-
-                        },
-                        modifier = Modifier
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_done),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .width(25.dp)
-                                .height(24.dp)
-                                .border(
-                                    width = 2.dp,
-                                    color = colorIcons,
-                                    shape = RoundedCornerShape(30.dp)
-                                )
-                                .padding(5.dp)
-                        )
-                    }
-
-                }
-            }
-
+            addNoteTopBar(
+                noteContent,
+                title,
+                subTitle,
+                dateTime,
+                navController,
+                noteViewModel,
+                scope,
+                scaffoldState,
+            )
         }) {
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            OutlinedTextField(
-                value = title,
-                onValueChange = {
-                    title = it
-                },
-                label = {
-                    Text(
-                        text = "Note Title",
-                        color = colorIcons,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(0.96f),
-                maxLines = 1,
-                colors = TextFieldDefaults.outlinedTextFieldColors(textColor = colorWhite)
-            )
+            addNoteTitle(title) {
+                title = it
+            }
             // 时间
             Row(
                 modifier = Modifier
@@ -469,100 +380,20 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
             ) {
                 Text(text = dateTime, color = colorIcons)
             }
-            Row(
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(
-                    modifier = Modifier
-                        .width(10.dp)
-                )
-                Spacer(
-                    modifier = Modifier
-                        .padding(top = 10.dp)
-                        .width(5.dp)
-                        .height(50.dp)
-                        .background(colorNoteColor2)
-                )
-                Spacer(
-                    modifier = Modifier
-                        .width(13.dp)
-                )
-                OutlinedTextField(
-                    value = subTitle,
-                    onValueChange = {
-                        subTitle = it
-                    },
-                    label = {
-                        Text(
-                            text = "Note subTitle",
-                            color = colorIcons,
-                            fontWeight = FontWeight.Bold
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(0.96f),
-                    maxLines = 1,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(textColor = colorWhite)
-                )
-                Spacer(
-                    modifier = Modifier
-                        .width(5.dp)
-                )
+            addNoteSubTitle(subTitle) {
+                subTitle = it
             }
             Spacer(
                 modifier = Modifier
                     .height(10.dp)
             )
             // 笔记内容体
-            OutlinedTextField(
-                value = noteContent,
-                onValueChange = {
-                    noteContent = it
-                },
-                placeholder = {
-                    Text(
-                        text = "Note content",
-                        color = colorIcons,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth(0.95f)
-                    .height(150.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = TextFieldDefaults.outlinedTextFieldColors(textColor = colorWhite)
-            )
-        }
-    }
-}
-
-@Composable
-fun noteItem(note: Note) {
-    Card(
-        elevation = 0.dp,
-        modifier = Modifier
-            .alpha(1f)
-            .padding(horizontal = 4.dp, vertical = 4.dp)
-    ) {
-        Card(
-            backgroundColor = colorPrimaryDark,
-            contentColor = colorWhite,
-            shape = RoundedCornerShape(10.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(all = 15.dp)
-            ) {
-                Text(
-                    text = note.title ?: "",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp,
-                    color = colorWhite
-                )
-                Text(text = note.subTitle ?: "", fontWeight = FontWeight.Bold, color = colorIcons)
-                Text(text = note.noteText, maxLines = 3)
+            addNoteContent(noteContent) {
+                noteContent = it
             }
         }
     }
 }
+
+
 

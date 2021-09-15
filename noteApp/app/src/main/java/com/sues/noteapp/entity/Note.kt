@@ -1,5 +1,6 @@
 package com.sues.noteapp.entity
 
+import androidx.compose.ui.graphics.Color
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -23,4 +24,6 @@ data class Note(
     var color: String? = null,
     @ColumnInfo(name = "web_link")
     var webLink: String? = null,
-): Serializable
+): Serializable{
+    constructor() : this(dateTime = "",noteText = "")
+}

@@ -37,10 +37,6 @@ fun reverse(x: Int): Int {
 
 }
 
-fun main() {
-    longestCommonPrefix(arrayOf("dsadsa", "dsad"))
-}
-
 fun longestCommonPrefix(strs: Array<String>): Unit {
 //    if (strs.size == 1) {
 //        return ""

@@ -22,4 +22,11 @@
     <style name="Theme.NoteAPP.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.NoteAPP.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="MySplashTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_round</item>
+        <item name="postSplashScreenTheme">@style/Theme.NoteAPP</item>
+    </style>
+
 </resources>

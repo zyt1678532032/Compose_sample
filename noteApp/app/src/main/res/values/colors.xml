@@ -12,4 +12,7 @@
     <color name="colorNoteColor3">#FFFF4842</color>
     <color name="colorNoteColor4">#FF3A52FC</color>
     <color name="colorNoteColor5">#FF000000</color>
+
+    <color name="background">#FF292929</color>
+
 </resources>
