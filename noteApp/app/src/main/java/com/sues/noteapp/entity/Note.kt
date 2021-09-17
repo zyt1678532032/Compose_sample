@@ -1,5 +1,6 @@
 package com.sues.noteapp.entity
 
+import android.graphics.Bitmap
 import androidx.compose.ui.graphics.Color
 import androidx.room.ColumnInfo
 import androidx.room.Entity

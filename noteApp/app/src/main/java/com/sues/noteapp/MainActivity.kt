@@ -1,19 +1,30 @@
 package com.sues.noteapp
 
+import android.annotation.SuppressLint
+import android.content.ContentResolver
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -21,44 +32,35 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.sues.noteapp.component.*
-import com.sues.noteapp.entity.Note
 import com.sues.noteapp.ui.theme.*
 import com.sues.noteapp.viewModel.NoteViewModel
 import kotlinx.coroutines.launch
-import java.lang.Math.ceil
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.ceil
-import androidx.compose.runtime.livedata.*
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.navigation.compose.navArgument
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.navigation
-import kotlinx.coroutines.CoroutineScope
 
 class MainActivity : ComponentActivity() {
 
     private val noteViewModel by viewModels<NoteViewModel>()
     private var dataBase: NoteDataBase? = null
+
+    companion object {
+        // 获取权限
+        const val REQUEST_CODE_STORAGE_PERMISSION = 1
+        const val REQUEST_CODE_SELECT_IMAGE = 2
+    }
 
     @ExperimentalAnimationApi
     @ExperimentalMaterialApi
@@ -68,32 +70,127 @@ class MainActivity : ComponentActivity() {
         // dataBase = NoteDataBase.getDataBase(applicationContext)
 
         setContent {
+            val imageBitmapState by noteViewModel.imageBitmap.observeAsState()
+            val imageUriState by noteViewModel.imageUri.observeAsState()
+
             NoteAPPTheme {
-                NavGraph(noteViewModel = noteViewModel)
+                NavGraph(
+                    noteViewModel = noteViewModel,
+                    context = applicationContext,
+                    activity = this,
+                    imageBitmap = imageBitmapState,
+                    contentResolver = contentResolver,
+                    imagePathUri = imageUriState
+                )
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_STORAGE_PERMISSION && grantResults.isNotEmpty()) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                selectImage()
+            } else {
+                Toast.makeText(this, "申请权限失败!", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    @SuppressLint("QueryPermissionsNeeded")
+    fun selectImage() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+//        if (intent.resolveActivity(packageManager) != null) {
+//             startActivityForResult(intent,REQUEST_CODE_SELECT_IMAGE)
+//            //registerForActivityResult()
+//        }
+        startActivityForResult(intent, REQUEST_CODE_SELECT_IMAGE)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_SELECT_IMAGE) {
+            // && requestCode == RESULT_OK
+            if (data != null) {
+                val imageUri = data.data
+                Log.i("Uri",imageUri.toString())
+                if (imageUri != null) {
+                    try {
+                        val inputStream = contentResolver.openInputStream(imageUri)
+                        val bitmap = BitmapFactory.decodeStream(inputStream)
+                        noteViewModel.imageBitmap.value = bitmap
+                        noteViewModel.imageUri.value = imageUri
+                    } catch (e: Exception) {
+                        Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
     }
 }
 
+fun getPathFromUri(imageUri: Uri,contentResolver: ContentResolver): String {
+    var filePath: String = ""
+    val cursor = contentResolver.query(imageUri, null, null, null, null)
+    if (cursor == null) {
+        filePath = imageUri.path!!
+    }else{
+        cursor.moveToFirst()
+        val index = cursor.getColumnIndex("_data")
+        filePath = cursor.getString(index)
+        cursor.close()
+    }
+    return filePath
+}
+
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
-fun NavGraph(noteViewModel: NoteViewModel) {
+fun NavGraph(
+    noteViewModel: NoteViewModel,
+    context: Context,
+    activity: MainActivity,
+    imageBitmap: Bitmap?,
+    imagePathUri: Uri?,
+    contentResolver: ContentResolver
+) {
     val navController = rememberAnimatedNavController()
     AnimatedNavHost(navController = navController, startDestination = "search") {
         composable("search") {
-            Search(navController = navController, noteViewModel = noteViewModel)
+            Search(
+                navController = navController,
+                noteViewModel = noteViewModel,
+                imagePathUri = imagePathUri,
+                contentResolver = contentResolver
+            )
         }
         composable(
             route = "addNote",
         ) {
-            AddNote(navController = navController, noteViewModel = noteViewModel)
+            AddNote(
+                navController = navController,
+                noteViewModel = noteViewModel,
+                context = context,
+                activity = activity,
+                imageBitmap = imageBitmap,
+                imagePathUri = imagePathUri,
+                contentResolver = contentResolver
+            )
         }
     }
 }
 
 @Composable
-fun Search(navController: NavHostController, noteViewModel: NoteViewModel) {
+fun Search(
+    navController: NavHostController,
+    noteViewModel: NoteViewModel,
+    imagePathUri: Uri?,
+    contentResolver: ContentResolver
+) {
     val (searchText, changeSearchText) = remember {
         mutableStateOf("")
     }
@@ -111,14 +208,24 @@ fun Search(navController: NavHostController, noteViewModel: NoteViewModel) {
         SearchContent(
             searchText = searchText,
             notes = noteViewModel.noteList.value!!,
-            onValueChange = changeSearchText
+            onValueChange = changeSearchText,
+            imagePathUri = imagePathUri,
+            contentResolver = contentResolver
         )
     }
 }
 
 @ExperimentalMaterialApi
 @Composable
-fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
+fun AddNote(
+    navController: NavHostController,
+    noteViewModel: NoteViewModel,
+    context: Context,
+    activity: MainActivity,
+    imageBitmap: Bitmap?,
+    contentResolver: ContentResolver,
+    imagePathUri: Uri?
+) {
     val (title, changeTitle) = remember {
         mutableStateOf("")
     }
@@ -176,7 +283,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                 Modifier
                     .fillMaxWidth()
                     .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Row(
                     horizontalArrangement = Arrangement.SpaceAround,
@@ -316,6 +423,43 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                         color = colorWhite,
                     )
                 }
+                // 添加图片
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                        .clickable {
+                            // Fixme: 添加图片
+                            // 关闭底部导航栏
+                            scope.launch {
+                                scaffoldState.bottomSheetState.collapse()
+                            }
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                                ) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                ActivityCompat.requestPermissions(
+                                    activity,
+                                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                                    MainActivity.REQUEST_CODE_STORAGE_PERMISSION
+                                )
+                            } else {
+                                activity.selectImage()
+                            }
+                        }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_image),
+                        contentDescription = null
+                    )
+                    Text(
+                        text = "添加图片",
+                        color = colorWhite
+                    )
+                }
             }
         },
         sheetPeekHeight = 60.dp,
@@ -335,41 +479,70 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
         },
         topBar = {
             AddNoteTopBar(
-                noteContent,
-                title,
-                subTitle,
-                dateTime,
-                navController,
-                noteViewModel,
-                scope,
-                scaffoldState,
-                selectedColor
+                noteContent = noteContent,
+                title = title,
+                subTitle = subTitle,
+                dateTime = dateTime,
+                navController = navController,
+                noteViewModel = noteViewModel,
+                scope = scope,
+                scaffoldState = scaffoldState,
+                selectedColor = selectedColor,
+                contentResolver = contentResolver,
+                imagePathUri = imagePathUri
             )
         }) {
-        Column(
+        LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 70.dp)
         ) {
 
-            AddNoteTitle(title = title, onValueChange = changeTitle)
-            // Fixme:这里好像也有问题(时间信息显示)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(0.96f)
-                    .padding(top = 5.dp, bottom = 5.dp)
-            ) {
-                Text(text = dateTime, color = colorIcons)
+            item {
+                AddNoteTitle(title = title, onValueChange = changeTitle)
+                // Fixme:这里好像也有问题(时间信息显示)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.96f)
+                        .padding(top = 5.dp, bottom = 5.dp)
+                ) {
+                    Text(text = dateTime, color = colorIcons)
+                }
+                AddNoteSubTitle(
+                    subTitle = subTitle,
+                    selectedColor = selectedColor,
+                    onValueChange = changeSubTitle
+                )
+                Spacer(
+                    modifier = Modifier
+                        .height(10.dp)
+                )
+                // Fixme: 添加图片布局
+                println(imageBitmap ?: "bitmap为空")
+                if (imageBitmap != null) {
+                    setImage(bitmap = imageBitmap)
+                }
+                Spacer(
+                    modifier = Modifier
+                        .height(10.dp)
+                )
+                // 笔记内容体
+                AddNoteContent(noteContent = noteContent, onValueChange = changeContent)
             }
-            AddNoteSubTitle(subTitle = subTitle, onValueChange = changeSubTitle)
-            Spacer(
-                modifier = Modifier
-                    .height(10.dp)
-            )
-            // 笔记内容体
-            AddNoteContent(noteContent = noteContent, onValueChange = changeContent)
+
         }
     }
+}
+
+@Composable
+fun setImage(bitmap: Bitmap) {
+    Image(
+        bitmap = bitmap.asImageBitmap(),
+        contentDescription = null,
+        modifier = Modifier.clip(RoundedCornerShape(15.dp))
+    )
 }
 
 

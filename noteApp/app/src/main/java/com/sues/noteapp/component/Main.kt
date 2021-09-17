@@ -1,5 +1,7 @@
 package com.sues.noteapp.component
 
+import android.content.ContentResolver
+import android.net.Uri
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -58,6 +60,8 @@ fun SearchBottomAppBar() {
 fun SearchContent(
     searchText: String,
     notes: List<Note>,
+    imagePathUri: Uri?,
+    contentResolver: ContentResolver,
     onValueChange: (String) -> Unit
 ) {
     Column(
@@ -95,7 +99,10 @@ fun SearchContent(
                 // Fixme:这里需要将backgroundColor变为动态选择
                 NoteItem(
                     note = notes[it],
-                    selectedColor = notes[it].color
+                    selectedColor = notes[it].color,
+                    contentResolver = contentResolver,
+                    imagePathUri = imagePathUri
+
                 )
             }
         }

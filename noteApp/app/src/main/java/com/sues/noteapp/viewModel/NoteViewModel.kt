@@ -1,9 +1,12 @@
 package com.sues.noteapp.viewModel
 
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.sues.noteapp.entity.Note
+import java.net.URI
 
 class NoteViewModel : ViewModel() {
 
@@ -11,6 +14,10 @@ class NoteViewModel : ViewModel() {
     var noteList: LiveData<List<Note>> = _noteList
 
     var colorIsShow = MutableLiveData<MutableList<Boolean>>()
+
+    var imageBitmap = MutableLiveData<Bitmap>()
+
+    var imageUri = MutableLiveData<Uri>()
 
     fun addNote(note: Note) {
         _noteList.value = _noteList.value!! + listOf(note)
