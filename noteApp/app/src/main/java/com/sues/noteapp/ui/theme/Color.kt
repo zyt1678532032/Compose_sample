@@ -32,3 +32,12 @@ val colorSearchBackground = Color(0xFF333333)
 
 val test = Color(0xFF018786)
 
+// 底部导航兰选择的颜色
+enum class SelectedColor {
+    Color1,
+    Color2,
+    Color3,
+    Color4,
+    Color5
+}
+

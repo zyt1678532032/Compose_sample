@@ -17,11 +17,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
-import com.sues.noteapp.ui.theme.colorIcons
 import com.sues.noteapp.R // app图片等资源
 import com.sues.noteapp.entity.Note
-import com.sues.noteapp.ui.theme.colorNoteColor2
-import com.sues.noteapp.ui.theme.colorWhite
+import com.sues.noteapp.ui.theme.*
 import com.sues.noteapp.viewModel.NoteViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -30,7 +28,7 @@ import java.util.*
 
 @ExperimentalMaterialApi
 @Composable
-fun addNoteTopBar(
+fun AddNoteTopBar(
     noteContent: String,
     title: String,
     subTitle: String,
@@ -39,13 +37,14 @@ fun addNoteTopBar(
     noteViewModel: NoteViewModel,
     scope: CoroutineScope,
     scaffoldState: BottomSheetScaffoldState,
+    selectedColor: SelectedColor
 ) {
     TopAppBar {
         Row(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            addNoteBackButton {
+            AddNoteBackButton {
                 navController.navigate(
                     route = "search",
                     navOptions = NavOptions.Builder()
@@ -54,7 +53,7 @@ fun addNoteTopBar(
                 )
             }
             Spacer(modifier = Modifier.fillMaxWidth(0.85f))
-            addNoteDoneButton {
+            AddNoteDoneButton {
                 if (noteContent.isEmpty()) {
                     scope.launch {
                         scaffoldState.snackbarHostState.showSnackbar(
@@ -69,6 +68,7 @@ fun addNoteTopBar(
                             subTitle = subTitle,
                             noteText = noteContent,
                             dateTime = dateTime,
+                            color = selectedColor
                         )
                     )
                     navController.navigate(
@@ -84,10 +84,16 @@ fun addNoteTopBar(
     }
 }
 
-
-
 @Composable
-fun noteItem(note: Note, backgroundColor: Color) {
+fun NoteItem(note: Note, selectedColor: SelectedColor) {
+    val backgroundColor =
+        when (selectedColor) {
+            SelectedColor.Color1 -> colorPrimaryDark
+            SelectedColor.Color2 -> colorNoteColor2
+            SelectedColor.Color3 -> colorNoteColor3
+            SelectedColor.Color4 -> colorNoteColor4
+            SelectedColor.Color5 -> colorNoteColor5
+        }
     Card(
         elevation = 0.dp,
         modifier = Modifier
@@ -116,7 +122,7 @@ fun noteItem(note: Note, backgroundColor: Color) {
 }
 
 @Composable
-fun addNoteSubTitle(subTitle: String, onValueChange: (String) -> Unit) {
+fun AddNoteSubTitle(subTitle: String, onValueChange: (String) -> Unit) {
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
@@ -128,9 +134,13 @@ fun addNoteSubTitle(subTitle: String, onValueChange: (String) -> Unit) {
         Spacer(
             modifier = Modifier
                 .padding(top = 10.dp)
-                .width(18.dp)
+                .width(5.dp)
                 .height(50.dp)
                 .background(colorNoteColor2)
+        )
+        Spacer(
+            modifier = Modifier
+                .width(13.dp)
         )
         OutlinedTextField(
             value = subTitle,
@@ -155,7 +165,7 @@ fun addNoteSubTitle(subTitle: String, onValueChange: (String) -> Unit) {
 }
 
 @Composable
-fun addNoteContent(noteContent: String, onValueChange: (String) -> Unit) {
+fun AddNoteContent(noteContent: String, onValueChange: (String) -> Unit) {
 
     OutlinedTextField(
         value = noteContent,
@@ -176,7 +186,7 @@ fun addNoteContent(noteContent: String, onValueChange: (String) -> Unit) {
 }
 
 @Composable
-fun addNoteTitle(title: String, onValueChange: (String) -> Unit) {
+fun AddNoteTitle(title: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = title,
         onValueChange = onValueChange,
@@ -195,7 +205,7 @@ fun addNoteTitle(title: String, onValueChange: (String) -> Unit) {
 
 @ExperimentalMaterialApi
 @Composable
-fun addNoteDoneButton(onClick: () -> Unit) {
+fun AddNoteDoneButton(onClick: () -> Unit) {
     IconButton(
         onClick = onClick,
         modifier = Modifier
@@ -217,7 +227,7 @@ fun addNoteDoneButton(onClick: () -> Unit) {
 }
 
 @Composable
-fun addNoteBackButton(onClick: () -> Unit) {
+fun AddNoteBackButton(onClick: () -> Unit) {
     IconButton(onClick = onClick) {
         Icon(
             painter = painterResource(id = R.drawable.ic_back),

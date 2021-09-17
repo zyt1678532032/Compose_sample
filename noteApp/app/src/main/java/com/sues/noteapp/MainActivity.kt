@@ -94,57 +94,38 @@ fun NavGraph(noteViewModel: NoteViewModel) {
 
 @Composable
 fun Search(navController: NavHostController, noteViewModel: NoteViewModel) {
-    var searchText by remember {
+    val (searchText, changeSearchText) = remember {
         mutableStateOf("")
     }
     Scaffold(
         topBar = {
-            TopAppBar() {
-                Text(
-                    text = "My Note",
-                    style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(start = 15.dp)
-                )
-            }
+            SearchTopBar()
         },
         bottomBar = {
-            searchBottomAppBar()
+            SearchBottomAppBar()
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    navController.navigate(
-                        route = "addNote",
-                        navOptions = NavOptions.Builder()
-                            .setPopUpTo(route = "addNote", inclusive = true).build()
-                    )
-                },
-                backgroundColor = colorNoteColor2,
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_add),
-                    contentDescription = null,
-                )
-            }
+            FloatingButton(navController = navController)
         }
     ) {
-        searchContent(searchText, noteViewModel.noteList.value!!) {
-            searchText = it
-        }
+        SearchContent(
+            searchText = searchText,
+            notes = noteViewModel.noteList.value!!,
+            onValueChange = changeSearchText
+        )
     }
 }
-
 
 @ExperimentalMaterialApi
 @Composable
 fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
-    var title by remember {
+    val (title, changeTitle) = remember {
         mutableStateOf("")
     }
-    var subTitle by remember {
+    val (subTitle, changeSubTitle) = remember {
         mutableStateOf("")
     }
-    var noteContent by remember {
+    val (noteContent, changeContent) = remember {
         mutableStateOf("")
     }
     val dateTime by remember {
@@ -153,7 +134,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
         mutableStateOf(time)
     }
     // 颜色选择器
-    // TODO: 2021/9/13 需要修改
+    // Fixme: 2021/9/13 颜色选择需要修改
     var colorState1 by remember {
         mutableStateOf(true)
     }
@@ -171,8 +152,9 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
     }
     // 选中颜色
     var selectedColor by remember {
-        mutableStateOf(Color.Black)
+        mutableStateOf(SelectedColor.Color1)
     }
+
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
 
@@ -210,11 +192,10 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                             colorState4 = false
                             colorState5 = false
                             colorState1 = true
-                            selectedColor = colorPrimaryDark
+                            selectedColor = SelectedColor.Color1
 
                         }
                     }) {
-
                         Icon(
                             painter = painterResource(id = R.drawable.ic_done),
                             contentDescription = null,
@@ -237,7 +218,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                             colorState4 = false
                             colorState5 = false
                             colorState2 = true
-                            selectedColor = colorNoteColor2
+                            selectedColor = SelectedColor.Color2
                         }
                     }) {
                         Icon(
@@ -262,7 +243,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                             colorState4 = false
                             colorState5 = false
                             colorState3 = true
-                            selectedColor = colorNoteColor2
+                            selectedColor = SelectedColor.Color3
 
                         }
                     }) {
@@ -288,7 +269,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                             colorState4 = false
                             colorState5 = false
                             colorState4 = true
-                            selectedColor = colorNoteColor4
+                            selectedColor = SelectedColor.Color4
                         }
                     }) {
                         Icon(
@@ -313,7 +294,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                             colorState4 = false
                             colorState5 = false
                             colorState5 = true
-                            selectedColor = colorNoteColor5
+                            selectedColor = SelectedColor.Color5
                         }
                     }) {
                         Icon(
@@ -353,7 +334,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
             }
         },
         topBar = {
-            addNoteTopBar(
+            AddNoteTopBar(
                 noteContent,
                 title,
                 subTitle,
@@ -362,6 +343,7 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
                 noteViewModel,
                 scope,
                 scaffoldState,
+                selectedColor
             )
         }) {
         Column(
@@ -369,10 +351,9 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            addNoteTitle(title) {
-                title = it
-            }
-            // 时间
+
+            AddNoteTitle(title = title, onValueChange = changeTitle)
+            // Fixme:这里好像也有问题(时间信息显示)
             Row(
                 modifier = Modifier
                     .fillMaxWidth(0.96f)
@@ -380,17 +361,13 @@ fun AddNote(navController: NavHostController, noteViewModel: NoteViewModel) {
             ) {
                 Text(text = dateTime, color = colorIcons)
             }
-            addNoteSubTitle(subTitle) {
-                subTitle = it
-            }
+            AddNoteSubTitle(subTitle = subTitle, onValueChange = changeSubTitle)
             Spacer(
                 modifier = Modifier
                     .height(10.dp)
             )
             // 笔记内容体
-            addNoteContent(noteContent) {
-                noteContent = it
-            }
+            AddNoteContent(noteContent = noteContent, onValueChange = changeContent)
         }
     }
 }

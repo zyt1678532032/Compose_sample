@@ -1,29 +1,33 @@
 package com.sues.noteapp.component
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.NavOptions
 import com.sues.noteapp.R
 import com.sues.noteapp.entity.Note
-import com.sues.noteapp.ui.theme.colorPrimaryDark
-import com.sues.noteapp.ui.theme.colorSearchIcon
-import com.sues.noteapp.ui.theme.colorTextHint
-import com.sues.noteapp.ui.theme.colorWhite
+import com.sues.noteapp.ui.theme.*
 import kotlin.math.ceil
 import kotlin.math.max
 
 
 @Composable
-fun searchBottomAppBar() {
+fun SearchBottomAppBar() {
     BottomAppBar(contentPadding = PaddingValues(start = 10.dp, end = 10.dp)) {
         IconButton(onClick = { /*TODO*/ }) {
             Icon(
@@ -51,7 +55,7 @@ fun searchBottomAppBar() {
 }
 
 @Composable
-fun searchContent(
+fun SearchContent(
     searchText: String,
     notes: List<Note>,
     onValueChange: (String) -> Unit
@@ -84,17 +88,47 @@ fun searchContent(
         StaggeredVerticalGrid(
             maxColumnWidth = 200.dp,
             modifier = Modifier
-                .padding(horizontal = 5.dp, vertical = 5.dp)
+                .padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 70.dp)
                 .verticalScroll(ScrollState(0))
         ) {
             repeat(notes.size) {
                 // Fixme:这里需要将backgroundColor变为动态选择
-                noteItem(
+                NoteItem(
                     note = notes[it],
-                    backgroundColor = colorPrimaryDark
+                    selectedColor = notes[it].color
                 )
             }
         }
+    }
+}
+
+@Composable
+fun SearchTopBar() {
+    TopAppBar {
+        Text(
+            text = "My Note",
+            style = TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(start = 15.dp)
+        )
+    }
+}
+
+@Composable
+fun FloatingButton(navController: NavHostController) {
+    FloatingActionButton(
+        onClick = {
+            navController.navigate(
+                route = "addNote",
+                navOptions = NavOptions.Builder()
+                    .setPopUpTo(route = "addNote", inclusive = true).build()
+            )
+        },
+        backgroundColor = colorNoteColor2,
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_add),
+            contentDescription = null,
+        )
     }
 }
 
@@ -227,7 +261,7 @@ fun StaggeredGrid(
 fun test() {
     StaggeredVerticalGrid(
         maxColumnWidth = 220.dp,
-    ){
+    ) {
         Text(
             text = "dsadsa"
         )

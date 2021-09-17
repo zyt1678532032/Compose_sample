@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.sues.noteapp.ui.theme.SelectedColor
 import java.io.Serializable
 
 @Entity(tableName = "notes")
@@ -21,7 +22,7 @@ data class Note(
     @ColumnInfo(name = "image_path")
     var imagePath: String? = null,
     @ColumnInfo(name = "color")
-    var color: String? = null,
+    var color: SelectedColor = SelectedColor.Color1,
     @ColumnInfo(name = "web_link")
     var webLink: String? = null,
 ): Serializable{
