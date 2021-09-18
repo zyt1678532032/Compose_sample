@@ -1,13 +1,17 @@
 package com.sues.noteapp.component
 
 import android.content.ContentResolver
+import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -15,15 +19,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
+import com.sues.noteapp.MainActivity
 import com.sues.noteapp.R // app图片等资源
+import com.sues.noteapp.SetImage
 import com.sues.noteapp.entity.Note
 import com.sues.noteapp.getPathFromUri
 import com.sues.noteapp.ui.theme.*
@@ -33,13 +43,332 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
+@ExperimentalMaterialApi
+@Composable
+fun AddNote(
+    navController: NavHostController,
+    noteViewModel: NoteViewModel,
+    context: Context,
+    activity: MainActivity,
+    contentResolver: ContentResolver,
+    imagePathUri: Uri?
+) {
+    val (title, changeTitle) = remember {
+        mutableStateOf("")
+    }
+    val (noteContent, changeContent) = remember {
+        mutableStateOf("")
+    }
+    val dateTime by remember {
+        val time = SimpleDateFormat("yyyy MMMM dd HH:MM a,EEEE", Locale.getDefault())
+            .format(Date())
+        mutableStateOf(time)
+    }
+    // 颜色选择器
+    // Fixme: 2021/9/13 颜色选择需要修改
+    var colorState1 by remember {
+        mutableStateOf(true)
+    }
+    var colorState2 by remember {
+        mutableStateOf(false)
+    }
+    var colorState3 by remember {
+        mutableStateOf(false)
+    }
+    var colorState4 by remember {
+        mutableStateOf(false)
+    }
+    var colorState5 by remember {
+        mutableStateOf(false)
+    }
+    // 选中颜色
+    var selectedColor by remember {
+        mutableStateOf(SelectedColor.Color1)
+    }
+
+    val scope = rememberCoroutineScope()
+    val scaffoldState = rememberBottomSheetScaffoldState()
+
+    BottomSheetScaffold(
+        sheetContent = {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .clickable {
+                        scope.launch { scaffoldState.bottomSheetState.collapse() }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Swipe up to expand sheet", color = colorWhite, fontWeight = FontWeight.Bold)
+            }
+
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    IconButton(onClick = {
+                        if (!colorState1) { // false
+                            // 其他的变为false
+                            colorState1 = false
+                            colorState2 = false
+                            colorState3 = false
+                            colorState4 = false
+                            colorState5 = false
+                            colorState1 = true
+                            selectedColor = SelectedColor.Color1
+
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_done),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .clip(
+                                    RoundedCornerShape(35.dp)
+                                )
+                                .background(colorPrimaryDark)
+                                .size(40.dp)
+                                .padding(5.dp),
+                            tint = if (colorState1) colorWhite else colorPrimaryDark
+                        )
+                    }
+                    IconButton(onClick = {
+                        if (!colorState2) { // false
+                            // 其他的变为false
+                            colorState1 = false
+                            colorState2 = false
+                            colorState3 = false
+                            colorState4 = false
+                            colorState5 = false
+                            colorState2 = true
+                            selectedColor = SelectedColor.Color2
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_done),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .clip(
+                                    RoundedCornerShape(35.dp)
+                                )
+                                .background(colorNoteColor2)
+                                .size(40.dp)
+                                .padding(5.dp),
+                            tint = if (colorState2) colorWhite else colorNoteColor2
+                        )
+                    }
+                    IconButton(onClick = {
+                        if (!colorState3) { // false
+                            // 其他的变为false
+                            colorState1 = false
+                            colorState2 = false
+                            colorState3 = false
+                            colorState4 = false
+                            colorState5 = false
+                            colorState3 = true
+                            selectedColor = SelectedColor.Color3
+
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_done),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .clip(
+                                    RoundedCornerShape(35.dp)
+                                )
+                                .background(colorNoteColor3)
+                                .size(40.dp)
+                                .padding(5.dp),
+                            tint = if (colorState3) colorWhite else colorNoteColor3
+                        )
+                    }
+                    IconButton(onClick = {
+                        if (!colorState4) { // false
+                            // 其他的变为false
+                            colorState1 = false
+                            colorState2 = false
+                            colorState3 = false
+                            colorState4 = false
+                            colorState5 = false
+                            colorState4 = true
+                            selectedColor = SelectedColor.Color4
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_done),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .clip(
+                                    RoundedCornerShape(35.dp)
+                                )
+                                .background(colorNoteColor4)
+                                .size(40.dp)
+                                .padding(5.dp),
+                            tint = if (colorState4) colorWhite else colorNoteColor4
+                        )
+                    }
+                    IconButton(onClick = {
+                        if (!colorState5) { // false
+                            // 其他的变为false
+                            colorState1 = false
+                            colorState2 = false
+                            colorState3 = false
+                            colorState4 = false
+                            colorState5 = false
+                            colorState5 = true
+                            selectedColor = SelectedColor.Color5
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_done),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .clip(
+                                    RoundedCornerShape(35.dp)
+                                )
+                                .background(colorNoteColor5)
+                                .size(40.dp)
+                                .padding(5.dp),
+                            tint = if (colorState5) colorWhite else colorNoteColor5
+                        )
+                    }
+                    Text(
+                        text = "选择颜色",
+                        fontWeight = FontWeight.Bold,
+                        color = colorWhite,
+                    )
+                }
+                // 添加图片
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                        .clickable {
+                            // Fixme: 添加图片
+                            // 关闭底部导航栏
+                            scope.launch {
+                                scaffoldState.bottomSheetState.collapse()
+                            }
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                                ) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                ActivityCompat.requestPermissions(
+                                    activity,
+                                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                                    MainActivity.REQUEST_CODE_STORAGE_PERMISSION
+                                )
+                            } else {
+                                activity.selectImage()
+                            }
+                        }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_image),
+                        contentDescription = null
+                    )
+                    Text(
+                        text = "添加图片",
+                        color = colorWhite
+                    )
+                }
+            }
+        },
+        sheetPeekHeight = 60.dp,
+        sheetBackgroundColor = colorMiscellaneousBackground,
+        sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        sheetElevation = 5.dp,
+        scaffoldState = scaffoldState,
+        snackbarHost = {// 提示框
+            SnackbarHost(it) { data ->
+                // custom snackbar with the custom border
+                Snackbar(
+                    modifier = Modifier.border(2.dp, MaterialTheme.colors.secondary),
+                    snackbarData = data,
+                    backgroundColor = colorWhite
+                )
+            }
+        },
+        topBar = {
+            AddNoteTopBar(
+                noteContent = noteContent,
+                title = title,
+                dateTime = dateTime,
+                navController = navController,
+                noteViewModel = noteViewModel,
+                scope = scope,
+                scaffoldState = scaffoldState,
+                selectedColor = selectedColor,
+                contentResolver = contentResolver,
+                imagePathUri = imagePathUri
+            )
+        }) {
+        LazyColumn(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 70.dp)
+        ) {
+
+            item {
+                //AddNoteTitle(title = title, onValueChange = changeTitle)
+                AddNoteTitle(
+                    title = title,
+                    selectedColor = selectedColor,
+                    onValueChange = changeTitle
+                )
+                // Fixme:这里好像也有问题(时间信息显示)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.96f)
+                        .padding(top = 5.dp, bottom = 5.dp)
+                ) {
+                    Text(text = dateTime, color = colorIcons)
+                }
+
+                Spacer(
+                    modifier = Modifier
+                        .height(10.dp)
+                )
+                // Fixme: 添加图片布局
+                if (imagePathUri != null) {
+                    SetImage(
+                        imagePathUri = imagePathUri,
+                        contentResolver = contentResolver,
+                        noteViewModel = noteViewModel
+                    )
+                }
+                Spacer(
+                    modifier = Modifier
+                        .height(10.dp)
+                )
+                // 笔记内容体
+                AddNoteContent(noteContent = noteContent, onValueChange = changeContent)
+            }
+
+        }
+    }
+}
+
 
 @ExperimentalMaterialApi
 @Composable
 fun AddNoteTopBar(
     noteContent: String,
     title: String,
-    subTitle: String,
     dateTime: String,
     navController: NavHostController,
     noteViewModel: NoteViewModel,
@@ -75,13 +404,12 @@ fun AddNoteTopBar(
                         Note(
                             id = 1,
                             title = title,
-                            subTitle = subTitle,
                             noteText = noteContent,
                             dateTime = dateTime,
                             color = selectedColor,
                             // Fixme: 添加imageURi
                             imagePath = getPathFromUri(
-                                imageUri = imagePathUri!!,
+                                imageUri = imagePathUri,
                                 contentResolver = contentResolver
                             )
                         )
@@ -102,13 +430,10 @@ fun AddNoteTopBar(
 @Composable
 fun NoteItem(
     note: Note,
-    selectedColor: SelectedColor,
-    imagePathUri: Uri?,
-    contentResolver: ContentResolver
 ) {
     // 颜色数据下沉到最后一个Composable函数中
     val backgroundColor =
-        when (selectedColor) { // 枚举类
+        when (note.color) { // 枚举类
             SelectedColor.Color1 -> colorPrimaryDark
             SelectedColor.Color2 -> colorNoteColor2
             SelectedColor.Color3 -> colorNoteColor3
@@ -127,34 +452,36 @@ fun NoteItem(
             shape = RoundedCornerShape(10.dp)
         ) {
             Column(
-                modifier = Modifier.padding(all = 15.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
+                // Fixme: 设置搜索界面图片
+                if (note.imagePath != null) {
+                    Image(
+                        bitmap = BitmapFactory.decodeFile(note.imagePath).asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 Text(
                     text = note.title ?: "",
                     fontWeight = FontWeight.Bold,
                     fontSize = 25.sp,
-                    color = colorWhite
+                    color = colorWhite,
+                    modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 5.dp)
                 )
-                // Fixme: 设置搜索界面图片
-                Log.i("imagePathUri",imagePathUri.toString())
-                if (note.imagePath != null) {
-                    val inputStream = contentResolver.openInputStream(imagePathUri!!)
-                    val bitmap = BitmapFactory.decodeStream(inputStream)
-                    Image(
-                        bitmap = BitmapFactory.decodeFile(note.imagePath).asImageBitmap(),
-                        contentDescription = null,
-                    )
-                }
-                Text(text = note.subTitle ?: "", fontWeight = FontWeight.Bold, color = colorIcons)
-                Text(text = note.noteText, maxLines = 3)
+                Text(
+                    text = note.noteText,
+                    maxLines = 2,
+                    modifier = Modifier.padding(start = 15.dp, end = 15.dp, bottom = 10.dp)
+                )
             }
         }
     }
 }
 
 @Composable
-fun AddNoteSubTitle(
-    subTitle: String,
+fun AddNoteTitle(
+    title: String,
     selectedColor: SelectedColor,
     onValueChange: (String) -> Unit
 ) {
@@ -186,11 +513,11 @@ fun AddNoteSubTitle(
                 .width(13.dp)
         )
         OutlinedTextField(
-            value = subTitle,
+            value = title,
             onValueChange = onValueChange,
             label = {
                 Text(
-                    text = "Note subTitle",
+                    text = "Note Title",
                     color = colorIcons,
                     fontWeight = FontWeight.Bold
                 )

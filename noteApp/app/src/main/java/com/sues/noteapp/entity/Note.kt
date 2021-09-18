@@ -16,8 +16,8 @@ data class Note(
     var title: String? = null,
     @ColumnInfo(name = "date_time")
     var dateTime: String,
-    @ColumnInfo(name = "subtitle")
-    var subTitle: String? = null,
+//    @ColumnInfo(name = "subtitle")
+//    var subTitle: String? = null,
     @ColumnInfo(name = "note_text")
     var noteText: String,
     @ColumnInfo(name = "image_path")

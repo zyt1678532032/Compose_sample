@@ -15,8 +15,6 @@ class NoteViewModel : ViewModel() {
 
     var colorIsShow = MutableLiveData<MutableList<Boolean>>()
 
-    var imageBitmap = MutableLiveData<Bitmap>()
-
     var imageUri = MutableLiveData<Uri>()
 
     fun addNote(note: Note) {
@@ -27,60 +25,51 @@ class NoteViewModel : ViewModel() {
 val notes = listOf(
     Note(
         title = "title1",
-        subTitle = "subTitle",
         noteText = "的撒hi大使馆蒂萨dsada",
         dateTime = "2021 9-13"
     ),
     Note(
         title = "title1",
-        subTitle = "subTitle",
         noteText = "的撒hi大使馆蒂萨dsada\ndsadasddasa爆单赛不带去",
         dateTime = "2021 9-13"
     ),
     Note(
         title = "title1",
-        subTitle = "subTitle",
         noteText = "的撒hi大使馆蒂萨dsada\n撒hi大使馆蒂萨dsada\n" +
                 "dsadasddasa爆单赛不带",
         dateTime = "2021 9-13"
     ),
     Note(
         title = "title1",
-        subTitle = "subTitle",
         noteText = "的撒hi大使馆蒂萨dsada\n撒hi大使馆蒂萨dsada\n" +
                 "dsadasddasa爆单赛不带",
         dateTime = "2021 9-13"
     ),
     Note(
         title = "title1",
-        subTitle = "subTitle",
         noteText = "的撒hi大使馆蒂萨dsada\n撒hi大使馆蒂萨dsada\n" +
                 "dsadasddasa爆单赛不带",
         dateTime = "2021 9-13"
     ),
     Note(
         title = "title1",
-        subTitle = "subTitle",
         noteText = "的撒hi大使馆蒂萨dsada\n撒hi大使馆蒂萨dsada\n" +
                 "dsadasddasa爆单赛不带",
         dateTime = "2021 9-13"
     ),
     Note(
         title = "title1",
-        subTitle = "subTitle",
         noteText = "的撒hi大使馆蒂萨dsada\n撒hi大使馆蒂萨dsada\n" +
                 "dsadasddasa爆单赛不带",
         dateTime = "2021 9-13"
     ),
     Note(
         title = "title1",
-        subTitle = "subTitle",
         noteText = "的撒hi大使馆蒂萨dsada",
         dateTime = "2021 9-13"
     ),
     Note(
         title = "title1",
-        subTitle = "subTitle",
         noteText = "的撒hi大使馆蒂萨dsada",
         dateTime = "2021 9-13"
     )

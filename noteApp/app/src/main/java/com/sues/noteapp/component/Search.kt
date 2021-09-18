@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,9 +26,36 @@ import androidx.navigation.NavOptions
 import com.sues.noteapp.R
 import com.sues.noteapp.entity.Note
 import com.sues.noteapp.ui.theme.*
+import com.sues.noteapp.viewModel.NoteViewModel
 import kotlin.math.ceil
 import kotlin.math.max
 
+@Composable
+fun Search(
+    navController: NavHostController,
+    noteViewModel: NoteViewModel,
+) {
+    val (searchText, changeSearchText) = remember {
+        mutableStateOf("")
+    }
+    Scaffold(
+        topBar = {
+            SearchTopBar()
+        },
+        bottomBar = {
+            SearchBottomAppBar()
+        },
+        floatingActionButton = {
+            FloatingButton(navController = navController)
+        }
+    ) {
+        SearchContent(
+            searchText = searchText,
+            notes = noteViewModel.noteList.value!!,
+            onValueChange = changeSearchText,
+        )
+    }
+}
 
 @Composable
 fun SearchBottomAppBar() {
@@ -60,8 +89,6 @@ fun SearchBottomAppBar() {
 fun SearchContent(
     searchText: String,
     notes: List<Note>,
-    imagePathUri: Uri?,
-    contentResolver: ContentResolver,
     onValueChange: (String) -> Unit
 ) {
     Column(
@@ -99,10 +126,6 @@ fun SearchContent(
                 // Fixme:这里需要将backgroundColor变为动态选择
                 NoteItem(
                     note = notes[it],
-                    selectedColor = notes[it].color,
-                    contentResolver = contentResolver,
-                    imagePathUri = imagePathUri
-
                 )
             }
         }
