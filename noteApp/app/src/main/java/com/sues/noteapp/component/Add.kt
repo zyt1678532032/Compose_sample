@@ -386,12 +386,12 @@ fun SheetContent(
                             Manifest.permission.READ_EXTERNAL_STORAGE
                         ) != PackageManager.PERMISSION_GRANTED
                     ) {
-                        println("未授权")
-                        ActivityCompat.requestPermissions(
-                            activity,
-                            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                            MainActivity.REQUEST_CODE_STORAGE_PERMISSION
-                        )
+//                        ActivityCompat.requestPermissions(
+//                            activity,
+//                            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+//                            MainActivity.REQUEST_CODE_STORAGE_PERMISSION
+//                        )
+                        activity.getPermission()
                     } else { // 已经授权
                         activity.selectImage()
                     }

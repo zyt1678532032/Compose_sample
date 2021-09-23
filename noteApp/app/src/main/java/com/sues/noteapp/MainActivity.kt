@@ -19,6 +19,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.launch
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -64,6 +65,7 @@ class MainActivity : ComponentActivity() {
 
     private val noteViewModel by viewModels<NoteViewModel>()
     lateinit var registerForActivityResult: ActivityResultLauncher<Void>
+    lateinit var registerPermission: ActivityResultLauncher<String>
 
 
     companion object {
@@ -86,21 +88,26 @@ class MainActivity : ComponentActivity() {
                     return Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
                 }
 
-                override fun parseResult(resultCode: Int, intent: Intent?): Uri {
-                    return intent!!.data!!
+                override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
+                    Log.i("parseResult", resultCode.toString())
+                    return intent!!.data
                 }
             }) {
-                Log.i("registerForActivityResult", it.toString())
-                noteViewModel.imageUri.value = it
+                if (it != null) {
+                    noteViewModel.imageUri.value = it
+                }
             }
-        val registerPermissions = ActivityResultContracts.RequestMultiplePermissions()
+
         // TODO: 2021/9/23 修改以前的申请权限功能
-        registerForActivityResult(registerPermissions) {
-            it.forEach{ entry ->
-                println(entry.key)
-                println(entry.value)
+        registerPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            if (it) {
+                // 授权通过
+                selectImage()
+            } else {
+                Toast.makeText(this@MainActivity, "申请权限失败", Toast.LENGTH_SHORT).show()
             }
         }
+
         setContent {
             val imageUriState: Uri? by noteViewModel.imageUri.observeAsState()
 
@@ -131,6 +138,9 @@ class MainActivity : ComponentActivity() {
 //        }
 //    }
 
+    fun getPermission() {
+        registerPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+    }
 
     @SuppressLint("QueryPermissionsNeeded")
     fun selectImage() {
