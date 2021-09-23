@@ -10,67 +10,46 @@ import java.net.URI
 
 class NoteViewModel : ViewModel() {
 
-    private val _noteList = MutableLiveData<List<Note>>(notes)
-    var noteList: LiveData<List<Note>> = _noteList
-
-    var colorIsShow = MutableLiveData<MutableList<Boolean>>()
+    // 搜索界面Note展示
+    private val _noteList = MutableLiveData<MutableList<Note>>(notes)
+    val noteList: LiveData<MutableList<Note>> = _noteList
 
     var imageUri = MutableLiveData<Uri>()
 
+    private val _note = MutableLiveData<Note>()
+    val note: LiveData<Note> = _note
+
+    fun updateNote(note: Note) {
+        val list: MutableList<Note> = _noteList.value!!
+        list.forEachIndexed { index, it ->
+            if (it.id == note.id) {
+                list[index] = note
+            }
+        }
+    }
+
     fun addNote(note: Note) {
-        _noteList.value = _noteList.value!! + listOf(note)
+        _noteList.value!!.plusAssign(mutableListOf(note))
     }
 }
 
-val notes = listOf(
+val notes = mutableListOf(
     Note(
+        id = 1,
         title = "title1",
         noteText = "的撒hi大使馆蒂萨dsada",
         dateTime = "2021 9-13"
     ),
     Note(
-        title = "title1",
-        noteText = "的撒hi大使馆蒂萨dsada\ndsadasddasa爆单赛不带去",
-        dateTime = "2021 9-13"
-    ),
-    Note(
-        title = "title1",
-        noteText = "的撒hi大使馆蒂萨dsada\n撒hi大使馆蒂萨dsada\n" +
-                "dsadasddasa爆单赛不带",
-        dateTime = "2021 9-13"
-    ),
-    Note(
-        title = "title1",
-        noteText = "的撒hi大使馆蒂萨dsada\n撒hi大使馆蒂萨dsada\n" +
-                "dsadasddasa爆单赛不带",
-        dateTime = "2021 9-13"
-    ),
-    Note(
-        title = "title1",
-        noteText = "的撒hi大使馆蒂萨dsada\n撒hi大使馆蒂萨dsada\n" +
-                "dsadasddasa爆单赛不带",
-        dateTime = "2021 9-13"
-    ),
-    Note(
-        title = "title1",
-        noteText = "的撒hi大使馆蒂萨dsada\n撒hi大使馆蒂萨dsada\n" +
-                "dsadasddasa爆单赛不带",
-        dateTime = "2021 9-13"
-    ),
-    Note(
-        title = "title1",
-        noteText = "的撒hi大使馆蒂萨dsada\n撒hi大使馆蒂萨dsada\n" +
-                "dsadasddasa爆单赛不带",
-        dateTime = "2021 9-13"
-    ),
-    Note(
+        id = 2,
         title = "title1",
         noteText = "的撒hi大使馆蒂萨dsada",
         dateTime = "2021 9-13"
     ),
     Note(
+        id = 3,
         title = "title1",
         noteText = "的撒hi大使馆蒂萨dsada",
         dateTime = "2021 9-13"
-    )
+    ),
 )

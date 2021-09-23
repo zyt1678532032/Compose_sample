@@ -1,5 +1,6 @@
 package com.sues.noteapp
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
@@ -14,12 +15,14 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
@@ -46,10 +49,13 @@ import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.gson.Gson
 import com.sues.noteapp.component.*
+import com.sues.noteapp.entity.Note
 import com.sues.noteapp.ui.theme.*
 import com.sues.noteapp.viewModel.NoteViewModel
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
@@ -57,7 +63,8 @@ import java.util.*
 class MainActivity : ComponentActivity() {
 
     private val noteViewModel by viewModels<NoteViewModel>()
-    private var dataBase: NoteDataBase? = null
+    lateinit var registerForActivityResult: ActivityResultLauncher<Void>
+
 
     companion object {
         // 获取权限
@@ -65,13 +72,35 @@ class MainActivity : ComponentActivity() {
         const val REQUEST_CODE_SELECT_IMAGE = 2
     }
 
+    @SuppressLint("LongLogTag")
+    @ExperimentalFoundationApi
     @ExperimentalAnimationApi
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        installSplashScreen()
-        // dataBase = NoteDataBase.getDataBase(applicationContext)
+        // installSplashScreen()
+        // TODO: 2021/9/23 修改以前的选择相册图片功能
+        registerForActivityResult =
+            registerForActivityResult(object : ActivityResultContract<Void, Uri>() {
+                override fun createIntent(context: Context, input: Void?): Intent {
+                    return Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                }
 
+                override fun parseResult(resultCode: Int, intent: Intent?): Uri {
+                    return intent!!.data!!
+                }
+            }) {
+                Log.i("registerForActivityResult", it.toString())
+                noteViewModel.imageUri.value = it
+            }
+        val registerPermissions = ActivityResultContracts.RequestMultiplePermissions()
+        // TODO: 2021/9/23 修改以前的申请权限功能
+        registerForActivityResult(registerPermissions) {
+            it.forEach{ entry ->
+                println(entry.key)
+                println(entry.value)
+            }
+        }
         setContent {
             val imageUriState: Uri? by noteViewModel.imageUri.observeAsState()
 
@@ -87,44 +116,43 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_STORAGE_PERMISSION && grantResults.isNotEmpty()) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                selectImage()
-            } else {
-                Toast.makeText(this, "申请权限失败!", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int,
+//        permissions: Array<out String>,
+//        grantResults: IntArray
+//    ) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//        if (requestCode == REQUEST_CODE_STORAGE_PERMISSION && grantResults.isNotEmpty()) {
+//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                // selectImage()
+//            } else {
+//                Toast.makeText(this, "申请权限失败!", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+//    }
+
 
     @SuppressLint("QueryPermissionsNeeded")
     fun selectImage() {
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-//        if (intent.resolveActivity(packageManager) != null) {
-//             startActivityForResult(intent,REQUEST_CODE_SELECT_IMAGE)
-//            //registerForActivityResult()
-//        }
-        startActivityForResult(intent, REQUEST_CODE_SELECT_IMAGE)
+        // val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        // startActivityForResult(intent, REQUEST_CODE_SELECT_IMAGE)
+        registerForActivityResult.launch(null)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_SELECT_IMAGE) {
-            // && requestCode == RESULT_OK
-            if (data != null) {
-                val imageUri = data.data
-                Log.i("Uri", imageUri.toString())
-                if (imageUri != null) {
-                    noteViewModel.imageUri.value = imageUri
-                }
-            }
-        }
-    }
+//        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//            super.onActivityResult(requestCode, resultCode, data)
+//            if (requestCode == REQUEST_CODE_SELECT_IMAGE) {
+//                // && requestCode == RESULT_OK
+//                if (data != null) {
+//                    val imageUri: Uri? = data.data
+//                    Log.i("Uri", imageUri.toString())
+//                    if (imageUri != null) {
+//                        noteViewModel.imageUri.value = imageUri
+//                    }
+//                }
+//            }
+//        }
+
 }
 
 fun getPathFromUri(imageUri: Uri?, contentResolver: ContentResolver): String? {
@@ -146,6 +174,7 @@ fun getPathFromUri(imageUri: Uri?, contentResolver: ContentResolver): String? {
     return filePath
 }
 
+@ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
@@ -176,17 +205,157 @@ fun NavGraph(
                 contentResolver = contentResolver
             )
         }
+        composable(route = "editNote") { entry ->
+//            val noteString = entry.arguments!!.getString("note")
+//            val jsonObject = JSONObject(noteString!!)
+//
+//            val title = jsonObject.getString("title")
+//            val noteText = jsonObject.getString("noteText")
+//            val imagePath = jsonObject.getString("imagePath")
+//            val color = jsonObject.getString("color")
+//            val id = jsonObject.getString("id")
+            val note = Note(
+                id = 1,
+                title = "title1",
+                noteText = "的撒hi大使馆蒂萨dsada",
+                dateTime = "2021 9-13"
+            )
+            EditNote(
+                note = note,
+                navController = navController,
+                noteViewModel = noteViewModel,
+                context = context,
+                activity = activity,
+                contentResolver = contentResolver
+            )
+        }
+    }
+}
+
+@ExperimentalMaterialApi
+@Composable
+fun EditNote(
+    note: Note,
+    navController: NavHostController,
+    noteViewModel: NoteViewModel,
+    context: Context,
+    activity: MainActivity,
+    contentResolver: ContentResolver
+) {
+    val (title, changeTitle) = remember {
+        mutableStateOf(note.title)
+    }
+    val (noteContent, changeContent) = remember {
+        mutableStateOf(note.noteText)
+    }
+    val dateTime by remember {
+        val time = SimpleDateFormat("yyyy MMMM dd HH:MM a,EEEE", Locale.getDefault())
+            .format(Date())
+        mutableStateOf(time)
+    }
+
+    // 选中颜色
+    val selectedColor = remember {
+        mutableStateOf(note.color)
+    }
+    val imagePath by remember {
+        mutableStateOf(note.imagePath)
+    }
+
+    val scope = rememberCoroutineScope()
+    val scaffoldState = rememberBottomSheetScaffoldState()
+
+    BottomSheetScaffold(
+        sheetContent = {
+            SheetContent(
+                scope = scope,
+                scaffoldState = scaffoldState,
+                selectedColor = selectedColor,
+                context = context,
+                activity = activity
+            )
+        },
+        sheetPeekHeight = 60.dp,
+        sheetBackgroundColor = colorMiscellaneousBackground,
+        sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        sheetElevation = 5.dp,
+        scaffoldState = scaffoldState,
+        snackbarHost = {// 提示框
+            SnackbarHost(it) { data ->
+                // custom snackbar with the custom border
+                Snackbar(
+                    modifier = Modifier.border(2.dp, MaterialTheme.colors.secondary),
+                    snackbarData = data,
+                    backgroundColor = colorWhite
+                )
+            }
+        },
+        topBar = {
+            AddNoteTopBar(
+                navController = navController,
+            ) {
+                note.color = selectedColor.value
+                noteViewModel.updateNote(note)
+            }
+        }) {
+        LazyColumn(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 70.dp)
+        ) {
+
+            item {
+                //AddNoteTitle(title = title, onValueChange = changeTitle)
+                AddNoteTitle(
+                    title = title!!,
+                    selectedColor = selectedColor.value,
+                    onValueChange = changeTitle
+                )
+                // Fixme:这里好像也有问题(时间信息显示)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.96f)
+                        .padding(top = 5.dp, bottom = 5.dp)
+                ) {
+                    Text(text = dateTime, color = colorIcons)
+                }
+
+                Spacer(
+                    modifier = Modifier
+                        .height(10.dp)
+                )
+                // Fixme: 添加图片布局
+                if (imagePath != null || noteViewModel.imageUri.value != null) {
+                    SetImage(
+                        imagePath = (if (imagePath != null) imagePath else
+                            noteViewModel.imageUri.value.let {
+                                note.imagePath = getPathFromUri(it, contentResolver)
+                                getPathFromUri(it, contentResolver)
+                            }) as String,
+                        noteViewModel = noteViewModel
+                    )
+                }
+                Spacer(
+                    modifier = Modifier
+                        .height(10.dp)
+                )
+                // 笔记内容体
+                AddNoteContent(noteContent = noteContent, onValueChange = changeContent)
+            }
+        }
     }
 }
 
 
 @Composable
-fun SetImage(imagePathUri: Uri, contentResolver: ContentResolver, noteViewModel: NoteViewModel) {
-    val inputStream = contentResolver.openInputStream(imagePathUri)
-    val bitmap = BitmapFactory.decodeStream(inputStream)
+fun SetImage(imagePath: String, noteViewModel: NoteViewModel) {
+    //  val inputStream = contentResolver.openInputStream(imagePathUri)
+    // val bitmap = BitmapFactory.decodeStream(inputStream)
     Box {
         Image(
-            bitmap = bitmap.asImageBitmap(),
+            bitmap = BitmapFactory.decodeFile(imagePath).asImageBitmap(),
             contentDescription = null,
             modifier = Modifier.clip(RoundedCornerShape(15.dp))
         )
@@ -196,7 +365,7 @@ fun SetImage(imagePathUri: Uri, contentResolver: ContentResolver, noteViewModel:
         ) {
             IconButton(
                 onClick = {
-                    // 删除选择的图片
+                    // Fixme:删除添加的图片
                     noteViewModel.imageUri.value = null
                 },
             ) {
@@ -209,6 +378,13 @@ fun SetImage(imagePathUri: Uri, contentResolver: ContentResolver, noteViewModel:
         }
 
     }
+}
+
+fun main() {
+    val jsonObject = JSONObject()
+    jsonObject.put("name", "zyt")
+    println(jsonObject)
+    println("dsad")
 }
 
 @Preview(showSystemUi = true)

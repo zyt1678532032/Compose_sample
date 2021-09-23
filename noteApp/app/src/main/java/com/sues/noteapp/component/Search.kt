@@ -2,14 +2,13 @@ package com.sues.noteapp.component
 
 import android.content.ContentResolver
 import android.net.Uri
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,6 +29,7 @@ import com.sues.noteapp.viewModel.NoteViewModel
 import kotlin.math.ceil
 import kotlin.math.max
 
+@ExperimentalFoundationApi
 @Composable
 fun Search(
     navController: NavHostController,
@@ -53,6 +53,7 @@ fun Search(
             searchText = searchText,
             notes = noteViewModel.noteList.value!!,
             onValueChange = changeSearchText,
+            navController = navController
         )
     }
 }
@@ -85,12 +86,18 @@ fun SearchBottomAppBar() {
 
 }
 
+@ExperimentalFoundationApi
 @Composable
 fun SearchContent(
     searchText: String,
     notes: List<Note>,
+    navController: NavHostController,
     onValueChange: (String) -> Unit
 ) {
+    // 控制右上角的删除框是否显示
+    val deletedState = remember {
+        mutableStateOf(false)
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -122,10 +129,11 @@ fun SearchContent(
                 .padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 70.dp)
                 .verticalScroll(ScrollState(0))
         ) {
-            repeat(notes.size) {
-                // Fixme:这里需要将backgroundColor变为动态选择
+            for (index in notes.size - 1 downTo 0) {
                 NoteItem(
-                    note = notes[it],
+                    note = notes[index],
+                    navController = navController,
+                    deletedState = deletedState
                 )
             }
         }
