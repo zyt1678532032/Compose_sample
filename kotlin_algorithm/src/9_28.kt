@@ -10,6 +10,4 @@ fun hasCycle(head: ListNode?): Boolean {
         }
     }
     return false
-
-
 }
