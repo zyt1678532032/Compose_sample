@@ -37,7 +37,7 @@ fun isAnagram2(s: String, t: String): Boolean {
     return false
 }
 
-class ListNode(var value: Int?) {
+class ListNode(var `val`: Int) {
     var next: ListNode? = null
 }
 
@@ -88,7 +88,7 @@ fun removeNthFromEnd(head: ListNode?, n: Int): ListNode? {
     return head
 }
 
-
+// 合并两个有序链表
 fun mergeTwoLists(l1: ListNode?, l2: ListNode?): ListNode? {
     if (l1 == null) {
         return l2
@@ -96,37 +96,65 @@ fun mergeTwoLists(l1: ListNode?, l2: ListNode?): ListNode? {
     if (l2 == null) {
         return l1
     }
-    // 以l1为基准
-    var p1 = l1
-    var p2 = l2
-    // 选择最小的值
-    var result = ListNode(0)
-    var p: ListNode = result
-    if (p1.value!! > p2.value!!){
-        result = ListNode(p2.value)
-        p2 = p2.next
+    // 都不为空
+    var p1: ListNode?
+    var p2: ListNode?
+    var result: ListNode
+    val node: ListNode
+    if (l1.`val` > l2.`val`) {
+        p1 = l1
+        p2 = l2.next
+        result = ListNode(l2.`val`)
+        node = result
     }else{
-        result = ListNode(p1.value)
-        p1 = p1.next
+        p1 = l1.next
+        p2 = l2
+        result = ListNode(l1.`val`)
+        node = result
     }
+    result.next = null
+
     while (p1 != null && p2 != null) {
-        if (p1.value!! > p2.value!!) {
-            p.next = ListNode(p2.value)
-            p = p.next!!
+        if (p1.`val` > p2.`val`) {
+            result.next = ListNode(p2.`val`)
             p2 = p2.next
+            result = result.next!!
         }else{
-            p.next = ListNode(p1.value)
-            p = p.next!!
+            result.next = ListNode(p1.`val`)
             p1 = p1.next
+            result = result.next!!
         }
     }
     if (p1 != null) {
-        p.next = p1
+        result.next = p1
     }
     if (p2 != null) {
-        p.next = p2
+        result.next = p2
+    }
+    return node
+}
+
+// 203. 移除链表元素中对应的元素
+fun removeElements(head: ListNode?, `val`: Int): ListNode? {
+    // 空间换时间
+    var p1 = head
+    var p2: ListNode? = null
+    var result: ListNode? = null
+    var flag = 0
+    while (p1 != null) {
+        if (p1.`val` != `val` ) {
+            if (flag == 0) {
+                p2 = ListNode(p1.`val`)
+                result = p2
+                flag = -1
+
+            }else{
+                p2?.next = ListNode(p1.`val`)
+                p2 = p2?.next
+            }
+
+        }
+        p1 = p1.next
     }
     return result
-
-
 }
