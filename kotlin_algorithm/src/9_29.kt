@@ -7,10 +7,11 @@ fun reverseList(head: ListNode?): ListNode? {
         values += p.`val`
         p = p.next
     }
+    // 具体实现
     p = null
     var result: ListNode? = null
     values.apply {
-        reverse()
+        reverse() // 翻转当前List中的数据
         forEachIndexed { index, ele ->
             if (index == 0) {
                 result = ListNode(ele)
@@ -20,6 +21,26 @@ fun reverseList(head: ListNode?): ListNode? {
             p?.next = ListNode(ele)
             p = p?.next
         }
+    }
+    return result
+}
+
+// 83. 删除排序链表中的重复元素
+fun deleteDuplicates(head: ListNode?): ListNode? {
+    // 遍历,将不重复的元素放进新链表中
+    if (head?.next == null) {
+        return head
+    }
+    // 至少两个元素
+    val result = ListNode(head.`val`)
+    var p1 = head
+    var p2 = result
+    while (p1 != null) {
+        if (p1.`val` != p2.`val`) {
+            p2.next = ListNode(p1.`val`)
+            p2 = p2.next!!
+        }
+        p1 = p1.next
     }
     return result
 }
