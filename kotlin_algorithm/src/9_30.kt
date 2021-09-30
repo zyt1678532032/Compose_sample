@@ -23,10 +23,30 @@ fun isValid(s: String): Boolean {
                 return@forEach
             }
         }
+        // 下面的情况就是: 栈空和右括号
         return false
     }
     if (top == -1) {
         return true
     }
     return false
+}
+
+class TreeNode(var `val`: Int) {
+    var left: TreeNode? = null
+    var right: TreeNode? = null
+}
+
+// 144. 二叉树的前序遍历
+fun preorderTraversal(root: TreeNode?): List<Int> {
+    if (root == null) {
+        return listOf()
+    } else if (root.left == null && root.right == null) {
+        return listOf(root.`val`)
+    } else  {
+        val result = mutableListOf<Int>(root.`val`)
+        result += preorderTraversal(root.left)
+        result += preorderTraversal(root.right)
+        return result
+    }
 }
