@@ -36,6 +36,16 @@ fun removeDuplicates(nums: IntArray): Int {
     return index + 1
 }
 
+// 27. 移除元素
+fun removeElement(nums: IntArray, `val`: Int): Int {
+    var index = 0
+    for (i in nums.indices) {
+        if (nums[i] != `val`) {
+            nums[index++] = nums[i]
+        }
+    }
+    return index + 1
+}
 fun main() {
     removeDuplicates(intArrayOf(1,1,2,3,3,5,7))
 }
