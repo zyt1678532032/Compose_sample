@@ -43,10 +43,29 @@ fun majorityElement(nums: IntArray): Int {
     val dict = mutableMapOf<Int, Int>()
     nums.forEach {
         if (dict.containsKey(it)) {
+            // todo: 注意这里不能写 dict[it]!!++
             dict[it] = dict[it]!! + 1
             return@forEach
         }
         dict[it] = 1
     }
     return dict.entries.find { it.value > nums.size / 2 }!!.key
+}
+
+// 219. 存在重复元素 II
+fun containsNearbyDuplicate(nums: IntArray, k: Int): Boolean {
+    // todo: 重复元素要想到使用Map来进行操作
+    val dict = mutableMapOf<Int, Int>()
+    nums.forEachIndexed { index, i ->
+        if (dict.containsKey(i)) {
+            if (index - dict[i]!! <= k) {
+                return true
+            }
+            // 更新最新的index
+            dict[i] = index
+            return@forEachIndexed
+        }
+        dict[i] = index
+    }
+    return false
 }
