@@ -1,3 +1,6 @@
+import java.util.*
+import kotlin.math.max
+
 // 20. 有效的括号(栈
 fun isValid(s: String): Boolean {
     val stack = CharArray(s.length)
@@ -39,14 +42,15 @@ class TreeNode(var `val`: Int) {
 
 // 144. 二叉树的前序遍历
 fun preorderTraversal(root: TreeNode?): List<Int> {
-    if (root == null) {
-        return listOf()
+    return if (root == null) {
+        listOf()
     } else if (root.left == null && root.right == null) {
-        return listOf(root.`val`)
+        listOf(root.`val`)
     } else  {
         val result = mutableListOf<Int>(root.`val`)
         result += preorderTraversal(root.left)
         result += preorderTraversal(root.right)
-        return result
+        result
     }
 }
+

@@ -1,4 +1,3 @@
-
 // 566. 重塑矩阵
 fun matrixReshape(mat: Array<IntArray>, r: Int, c: Int): Array<IntArray> {
     val matR = mat.size
@@ -36,11 +35,12 @@ fun main() {
         }
     }
 }
+
 // 167:两数之和II - 输入有序数组
 fun twoSum(numbers: IntArray, target: Int): IntArray {
     val result = IntArray(2)
     val map = mutableMapOf<Int, Int>()
-    numbers.forEachIndexed{ index, element ->
+    numbers.forEachIndexed { index, element ->
         val temp = target - element
         if (map.containsKey(temp)) {
             result[0] = index + 1
@@ -49,6 +49,33 @@ fun twoSum(numbers: IntArray, target: Int): IntArray {
             return result
         }
         map[element] = index + 1
+    }
+    return result
+}
+
+fun reverseString(s: CharArray): Unit {
+    var left = 0
+    var right = s.size - 1
+    while (left < right) {
+        val temp = s[left]
+        s[left] = s[right]
+        s[right] = temp
+        left++
+        right--
+    }
+}
+
+fun reverseWords(s: String): String {
+    val list = s.split(' ').toMutableList()
+    for (i in list.indices) {
+        list[i] = list[i].reversed()
+    }
+    var result = ""
+    list.forEachIndexed { index, element ->
+        if (index != list.size - 1) {
+            result += "$element "
+        }
+        result += element
     }
     return result
 }

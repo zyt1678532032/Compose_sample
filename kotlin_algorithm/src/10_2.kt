@@ -1,10 +1,9 @@
 import kotlin.math.max
 
 fun main() {
-    val s = "abcdhua"
-    println(s.slice(0..0))
-    println(checkIsRepeat(s))
-    println(lengthOfLongestSubstring(s))
+    for (i in 0..2) {
+        println(i)
+    }
 }
 
 // 102. 二叉树的高度
@@ -20,10 +19,10 @@ fun maxDepth(root: TreeNode?): Int {
 // 3. 无重复字符的最长子串(滑动窗口)  复杂度必须为O(n)
 fun lengthOfLongestSubstring(s: String): Int {
 
-    // 1.窗口大小从2开始,判断窗口内的字符是否重复,不重复窗口大小加以一
+    // 1.窗口大小从0开始,判断窗口内的字符是否重复,不重复窗口大小加以一
     // 在从当前字符判断窗口内的字符是否重复，重复往下遍历，不重复则重复上面步骤
     var windowSize = 0
-    s.forEachIndexed { index, c ->
+    s.forEachIndexed { index, _ ->
         if (index + windowSize != s.length) {
             // 当窗口内的元素存在重复元素时跳出循环
             while (!checkIsRepeat(s.slice(index..index + windowSize))) {
@@ -40,6 +39,7 @@ fun lengthOfLongestSubstring(s: String): Int {
 }
 
 fun checkIsRepeat(string: String): Boolean {// 判断当前字符串中是否含有重复字符
+    // 只需要将最后一个字符和前面的字符串进行比较即可
     string.forEach { c1 ->
         var index = 0
         string.forEach { c2 ->

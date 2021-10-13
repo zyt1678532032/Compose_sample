@@ -27,8 +27,6 @@ fun test(): Int {
     return 1
 }
 
-
-
 fun func(action: (Int) -> Unit): Int {
     println("func 开始执行")
     for (i in 0..2) {
@@ -49,3 +47,18 @@ inline fun hasInlineFunc(action: () -> Unit) {
 fun noInlineFunc(action: () -> Unit) {
     action()
 }
+
+// kotlin 中没有java的三元表达式
+/*  java
+    int a = 10;
+    int b = 11;
+    int c = a > b ? a : b;
+* */
+
+// kotlin
+
+var name: String? = null
+val b = if (name == null) "zyt" else "ben"
+
+
+

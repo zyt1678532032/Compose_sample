@@ -43,6 +43,7 @@ fun checkInclusion2(s1: String, s2: String): Boolean {
 
 // 232. 用栈实现队列
 class MyQueue() {
+
     private val stackPush: Stack<Int> = Stack()
     private val stackPop: Stack<Int> = Stack()
 

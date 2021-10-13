@@ -12,7 +12,7 @@ fun main() {
 }
 
 open class People(
-    open val name: String = "People" // 当声明为private时,就表明该属性不可被覆盖
+    open var name: String = "People" // 当声明为private时,就表明该属性不可被覆盖
 ) {
 
     fun funOfPeople(people: People) {
@@ -26,7 +26,7 @@ open class People(
 }
 
 class Worker(
-    override val name: String
+    override var name: String
 ) : People()
 
 

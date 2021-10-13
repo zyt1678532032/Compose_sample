@@ -1,3 +1,5 @@
+import java.util.*
+
 // 66. 加一
 fun plusOne(digits: IntArray): IntArray {
 
@@ -17,7 +19,7 @@ fun plusOne(digits: IntArray): IntArray {
 }
 
 fun main() {
-    println(plusOne(intArrayOf(1, 2, 3)).contentToString())
+
 }
 
 // 119. 杨辉三角 II
@@ -69,3 +71,4 @@ fun containsNearbyDuplicate(nums: IntArray, k: Int): Boolean {
     }
     return false
 }
+

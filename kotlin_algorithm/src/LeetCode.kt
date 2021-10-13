@@ -17,14 +17,14 @@ fun main() {
 
 //    var node = addTwoNumbers(listNode, listNode3)
 //    while (node != null) {
-//        println(node.value)
+//        println(node.`val`)
 //        node = node.next
 //    }
     val genNode = genNode(9, 9, 9, 9, 9, 9, 9)
     val genNode2 = genNode(9, 9, 9, 9)
     var node = addTwoNumbers(genNode, genNode2)
     while (node != null) {
-        println(node.value)
+        println(node.`val`)
         node = node.next
     }
 
@@ -39,8 +39,8 @@ fun addTwoNumbers(l1: ListNode?, l2: ListNode?): ListNode? {
     var cursor = root
     var carry = 0
     while (l1_ != null || l2_ != null || carry != 0) {
-        val l1Val = l1_?.value ?: 0
-        val l2Val = l2_?.value ?: 0
+        val l1Val = l1_?.`val` ?: 0
+        val l2Val = l2_?.`val` ?: 0
         val sumVal = l1Val + l2Val + carry
         carry = sumVal / 10
         val sumNode = ListNode(sumVal % 10)
@@ -52,9 +52,6 @@ fun addTwoNumbers(l1: ListNode?, l2: ListNode?): ListNode? {
     return root.next
 }
 
-class ListNode(var value: Int) {
-    var next: ListNode? = null
-}
 
 fun genNode(vararg param: Int): ListNode {
     val firstNode = ListNode(param[0])

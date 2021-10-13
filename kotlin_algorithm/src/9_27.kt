@@ -1,5 +1,6 @@
 import java.util.*
 import java.util.concurrent.Flow
+import javax.lang.model.type.NullType
 
 // 1.双层循环
 fun isAnagram(s: String, t: String): Boolean {
@@ -147,12 +148,10 @@ fun removeElements(head: ListNode?, `val`: Int): ListNode? {
                 p2 = ListNode(p1.`val`)
                 result = p2
                 flag = -1
-
             }else{
                 p2?.next = ListNode(p1.`val`)
                 p2 = p2?.next
             }
-
         }
         p1 = p1.next
     }

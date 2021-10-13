@@ -33,8 +33,8 @@ fun deleteDuplicates(head: ListNode?): ListNode? {
     }
     // 至少两个元素
     val result = ListNode(head.`val`)
-    var p1 = head
-    var p2 = result
+    var p1 = head // 遍历参数链表的指针
+    var p2 = result // 遍历最后结果的指针
     while (p1 != null) {
         if (p1.`val` != p2.`val`) {
             p2.next = ListNode(p1.`val`)

@@ -48,37 +48,23 @@ fun removeElement(nums: IntArray, `val`: Int): Int {
     return index + 1
 }
 
-// 66. 加一
-fun plusOne(digits: IntArray): IntArray {
-    var sum = 0
-    var index = digits.size - 1
-    digits.forEach {
-        sum += it * (10 `**` index)
-        index--
-    }
-    sum += 1
-    val result = IntArray(sum.toString().length)
-
-    index = sum.toString().length - 1
-    while (sum != 0) {
-        result[index] = sum % 10
-        sum /= 10
-        index--
-    }
-    return result
-}
-
-infix fun Int.`**`(times: Int): Int {// 10 ** 2 == 100 ; 8 ** 2 = 64
-    var result = 1
-    for (i in 0 until times) {
-        result *= this
-    }
-    return result
-}
 
 fun main() {
+
     println(10 / 10)
-    println(plusOne(intArrayOf(1,9,9)).contentToString())
     //removeDuplicates(intArrayOf(1, 1, 2, 3, 3, 5, 7))
+    buildString {
+        appendLine()
+    }
+    val numbers = listOf(1, 2, 3, 4, 5, 6)
+    val invertedOddNumbers = numbers
+        .filter { it % 2 != 0 }
+        .joinToString{ "${-it}" }
+    println(invertedOddNumbers)
+
+
+}
+
+class A{
 
 }

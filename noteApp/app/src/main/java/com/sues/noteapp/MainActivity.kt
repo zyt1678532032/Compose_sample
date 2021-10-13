@@ -97,16 +97,16 @@ class MainActivity : ComponentActivity() {
                     noteViewModel.imageUri.value = it
                 }
             }
-
         // TODO: 2021/9/23 修改以前的申请权限功能
-        registerPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-            if (it) {
-                // 授权通过
-                selectImage()
-            } else {
-                Toast.makeText(this@MainActivity, "申请权限失败", Toast.LENGTH_SHORT).show()
+        registerPermission =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { permissionResult ->
+                if (permissionResult) {
+                    // 授权通过
+                    selectImage()
+                } else {
+                    Toast.makeText(this@MainActivity, "申请权限失败", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
 
         setContent {
             val imageUriState: Uri? by noteViewModel.imageUri.observeAsState()
@@ -123,54 +123,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-//    override fun onRequestPermissionsResult(
-//        requestCode: Int,
-//        permissions: Array<out String>,
-//        grantResults: IntArray
-//    ) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        if (requestCode == REQUEST_CODE_STORAGE_PERMISSION && grantResults.isNotEmpty()) {
-//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                // selectImage()
-//            } else {
-//                Toast.makeText(this, "申请权限失败!", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-//    }
-
     fun getPermission() {
+        // 申请权限
         registerPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
-    @SuppressLint("QueryPermissionsNeeded")
     fun selectImage() {
-        // val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        // startActivityForResult(intent, REQUEST_CODE_SELECT_IMAGE)
         registerForActivityResult.launch(null)
     }
-
-//        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//            super.onActivityResult(requestCode, resultCode, data)
-//            if (requestCode == REQUEST_CODE_SELECT_IMAGE) {
-//                // && requestCode == RESULT_OK
-//                if (data != null) {
-//                    val imageUri: Uri? = data.data
-//                    Log.i("Uri", imageUri.toString())
-//                    if (imageUri != null) {
-//                        noteViewModel.imageUri.value = imageUri
-//                    }
-//                }
-//            }
-//        }
 
 }
 
 fun getPathFromUri(imageUri: Uri?, contentResolver: ContentResolver): String? {
-    // fixme: filepath可以这样定义
     if (imageUri == null) {
         // 没有选择图片
         return null
     }
+    // fixme: filepath可以这样定义
     val filePath: String
     val cursor = contentResolver.query(imageUri, null, null, null, null)
     if (cursor == null) {
@@ -361,8 +330,7 @@ fun EditNote(
 
 @Composable
 fun SetImage(imagePath: String, noteViewModel: NoteViewModel) {
-    //  val inputStream = contentResolver.openInputStream(imagePathUri)
-    // val bitmap = BitmapFactory.decodeStream(inputStream)
+
     Box {
         Image(
             bitmap = BitmapFactory.decodeFile(imagePath).asImageBitmap(),
@@ -397,7 +365,7 @@ fun main() {
     println("dsad")
 }
 
-@Preview(showSystemUi = true)
+@Preview(showSystemUi = true, group = "Test")
 @Composable
 fun test() {
     Box {

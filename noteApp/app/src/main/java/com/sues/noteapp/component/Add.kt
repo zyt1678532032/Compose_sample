@@ -386,11 +386,6 @@ fun SheetContent(
                             Manifest.permission.READ_EXTERNAL_STORAGE
                         ) != PackageManager.PERMISSION_GRANTED
                     ) {
-//                        ActivityCompat.requestPermissions(
-//                            activity,
-//                            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-//                            MainActivity.REQUEST_CODE_STORAGE_PERMISSION
-//                        )
                         activity.getPermission()
                     } else { // 已经授权
                         activity.selectImage()
@@ -491,7 +486,7 @@ fun NoteItem(
                             .size(22.dp)
                             .clip(shape = RoundedCornerShape(15.dp))
                             .background(colorNoteColor2)
-                            //.paint(painter = painterResource(id = R.drawable.ic_done))
+                        //.paint(painter = painterResource(id = R.drawable.ic_done))
                     )
                 }
                 Column(
@@ -598,24 +593,6 @@ fun AddNoteContent(noteContent: String, onValueChange: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth(0.95f),
         shape = RoundedCornerShape(10.dp),
-        colors = TextFieldDefaults.outlinedTextFieldColors(textColor = colorWhite)
-    )
-}
-
-@Composable
-fun AddNoteTitle(title: String, onValueChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = title,
-        onValueChange = onValueChange,
-        label = {
-            Text(
-                text = "Note Title",
-                color = colorIcons,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        modifier = Modifier.fillMaxWidth(0.96f),
-        maxLines = 1,
         colors = TextFieldDefaults.outlinedTextFieldColors(textColor = colorWhite)
     )
 }

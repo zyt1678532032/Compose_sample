@@ -8,15 +8,8 @@ import kotlin.reflect.KProperty
  */
 class Purchasing(val money: Float) {
 
-    operator fun getValue(people: People, property: KProperty<*>): Any? {
-        var phone: Phone? = null
-        val intArrayOf = intArrayOf()
-        phones.forEach {
-            if (money == it.price){
-                phone = it
-            }
-        }
-        return phone
+    operator fun getValue(people: People, property: KProperty<*>): Any {
+        return people
     }
 
 }

@@ -30,7 +30,6 @@ fun summaryRanges(nums: IntArray): List<String> {
     val result = mutableListOf<String>()
     var start = nums[0]
     var index = start // 对数组中的数据对比的(递增)变量
-    var end: Int = start
     // 2. if 当前元素和递增的不相同,则将前一个元素进行标记,到此第一个有序区间已经找到,重复上面过程
     for (i in 1 until nums.size) {
         // 循环里面的操作应该是什么?
@@ -38,30 +37,42 @@ fun summaryRanges(nums: IntArray): List<String> {
         index++
         if (nums[i] == index) { // 往下遍历
             continue
-        } else { // end = nums[i - 1]
-            end = nums[i - 1]
+        } else {
             // 添加到result
-            if (start != end) {
-                result += "$start->$end"
+            if (start != nums[i - 1]) {
+                result += "$start->${nums[i - 1]}"
                 // start 和 end 全部重新开始
                 start = nums[i]
                 index = start
-                end = start
                 continue
             }
             // 相等
             result += "$start"
             start = nums[i] // 改变区间起点
             index = start
-            end = start
         }
     }
-    if (index == end) { // 区间只有一个
+    if (index == start) { // 区间只有一个
         result += "$start"
     }
-    if (index > end) {
+    if (index > start) {
         result += "$start->$index"
     }
     return result
 
 }
+
+fun intersection(nums1: IntArray, nums2: IntArray): IntArray {
+    val set1 = mutableSetOf<Int>(*nums1.toTypedArray())
+    val set2 = mutableSetOf<Int>()
+    nums1.forEach {
+        set1 += it
+    }
+    nums2.forEach {
+        if (set1.contains(it)) {
+            set2 += it
+        }
+    }
+    return set2.toIntArray()
+}
+
