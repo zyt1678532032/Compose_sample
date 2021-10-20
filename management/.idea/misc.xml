@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Android projects/Compose_sample/management/app/src/main/res/layout/layout_activity_main.xml" value="0.33" />
+        <entry key="..\:/Android projects/Compose_sample/management/app/src/main/res/layout/layout_activity_register.xml" value="0.14351851851851852" />
         <entry key="..\:/Android projects/FlutterLearning/management/app/src/main/res/drawable/ic_add_background.xml" value="0.2388888888888889" />
         <entry key="..\:/Android projects/FlutterLearning/management/app/src/main/res/drawable/ic_launcher_background.xml" value="0.16574074074074074" />
         <entry key="..\:/Android projects/FlutterLearning/management/app/src/main/res/layout/activity_main.xml" value="0.1" />

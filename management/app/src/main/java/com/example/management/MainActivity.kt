@@ -14,16 +14,17 @@ import android.os.Handler
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.management.service.ManagementService
+import com.example.management.model.MainViewModel
 import kotlinx.android.synthetic.main.layout_activity_main.*
+import kotlinx.android.synthetic.main.layout_activity_register.*
 import kotlinx.android.synthetic.main.layout_change_assets.*
 import kotlinx.coroutines.*
 import okhttp3.*
-import okio.blackholeSink
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -35,19 +36,27 @@ class MainActivity : AppCompatActivity() {
     private val baseUrl = "http://10.0.2.2:5000/session1"
     private val client = OkHttpClient()
     private val handler = Handler()
+    private val mainViewModel by viewModels<MainViewModel>()
+    //private val mainViewModel by lazy {
+    //    MainViewModel()
+    //}
 
     @DelicateCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_activity_main)
 
-        GlobalScope.launch {
-            test()
+        mainViewModel.assetGroups.observe(this) {
+            (spinner2 as Spinner).adapter =
+                ArrayAdapter(this, android.R.layout.simple_list_item_1, it)
         }
-        // 加载department Spinner
-        loadDepartments()
-        // 加载Asset Group Spinner
-        // loadAssetGroup()
+        mainViewModel.departments.observe(this){
+            (spinner1 as Spinner).adapter =
+                ArrayAdapter(this, android.R.layout.simple_list_item_1, it)
+        }
+
+
+
         // 日期选择
         startDateChoose()
         // 截至日期
@@ -65,26 +74,9 @@ class MainActivity : AppCompatActivity() {
                 showAssetList(*params)
             }
         }
-
         // 添加按钮
         (add as ImageButton).setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
-        }
-    }
-
-    // todo: 使用协程加载AssetGroup
-    suspend fun test() {
-        val response = withContext(Dispatchers.IO) {
-            ManagementService.service.getAllAssetsGroups()
-        }
-        val groups = response.body()
-        val data = mutableListOf<String>()
-        for (group in groups!!) {
-            data += group.Name
-        }
-        handler.post {
-            (spinner2 as Spinner).adapter =
-                ArrayAdapter(this, android.R.layout.simple_list_item_1, data)
         }
     }
 
@@ -184,68 +176,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Toast.makeText(this, "竖屏", Toast.LENGTH_SHORT).show()
-        } else if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // 横屏
-            setContentView(R.layout.layout_change_assets)
-            Toast.makeText(this, "横屏", Toast.LENGTH_SHORT).show()
-            // 获取竖屏的数据
-            val sharedPreferences = getSharedPreferences("AssetList", Activity.MODE_PRIVATE)
-            val jsonArrayString = sharedPreferences.getString("data", "null")
-            Log.i("jsonArrayString", jsonArrayString!!)
-
-            val data = mutableListOf<JSONObject>()
-            val jsonArray = JSONArray(jsonArrayString)
-            for (i in 0 until jsonArray.length()) {
-                data += jsonArray.getJSONObject(i)
-            }
-            // 创建适配器
-            val adapter = object : RecyclerView.Adapter<ChangedAssetHolder>() {
-                override fun onCreateViewHolder(
-                    parent: ViewGroup,
-                    viewType: Int
-                ): ChangedAssetHolder {
-                    return ChangedAssetHolder(
-                        layoutInflater.inflate(
-                            R.layout.item_change_asset,
-                            parent,
-                            false
-                        )
-                    )
-                }
-
-                @RequiresApi(Build.VERSION_CODES.O)
-                override fun onBindViewHolder(holder: ChangedAssetHolder, position: Int) {
-                    holder.assetName.text = data[position].getString("Name")
-                    holder.assetSN.text = data[position].getString("SN")
-                    val id = data[position].getString("ID")
-                    getBitmapByID(id) {
-                        handler.post {
-                            holder.imageView.setImageBitmap(it)
-                        }
-                    }
-                }
-
-                override fun getItemCount(): Int {
-                    return data.size
-                }
-
-            }
-            // RecycleView 设置布局管理等配置
-            (recyclerView as RecyclerView).apply {
-                // 布局管理
-                val linearLayoutManager = LinearLayoutManager(this@MainActivity)
-                linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
-                layoutManager = linearLayoutManager
-                // 设置适配器
-                this.adapter = adapter
-            }
-        }
-    }
-
     private fun endDateChoose() {
         (pickEndDate as ImageView).setOnClickListener {
             val calendar = Calendar.getInstance()
@@ -278,43 +208,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 加载Spinner2 AssetGroup
-    private fun loadAssetGroup() {
-        val assetGroup = mutableListOf<String>()
-        val url = "${baseUrl}/findAllAssetGroups"
-        loadDataByGet(url, client) {
-            val string = it.body!!.string()
-            val jsonArray = JSONArray(string)
-            for (i in 0 until jsonArray.length()) {
-                val jsonObject = jsonArray.getJSONObject(i)
-                assetGroup += jsonObject.getString("Name")
-            }
-            // 主线程更新UI
-            handler.post {
-                (spinner2 as Spinner).adapter =
-                    ArrayAdapter(this, android.R.layout.simple_list_item_1, assetGroup)
-            }
-        }
-    }
 
-    // 加载Spinner1 Departments
-    private fun loadDepartments() {
-        val departments = mutableListOf<String>()
-        val url = "${baseUrl}/findDepartments"
-        loadDataByGet(url, client) {
-            val string = it.body!!.string()
-            val jsonArray = JSONArray(string)
-            for (i in 0 until jsonArray.length()) {
-                val jsonObject = jsonArray.getJSONObject(i)
-                departments += jsonObject.getString("Name")
-            }
-            // 主线程更新UI
-            handler.post {
-                (spinner1 as Spinner).adapter =
-                    ArrayAdapter(this, android.R.layout.simple_list_item_1, departments)
-            }
-        }
-    }
 
 
 }
