@@ -136,24 +136,24 @@ fun mergeTwoLists(l1: ListNode?, l2: ListNode?): ListNode? {
 }
 
 // 203. 移除链表元素中对应的元素
-fun removeElements(head: ListNode?, `val`: Int): ListNode? {
-    // 空间换时间
-    var p1 = head
-    var p2: ListNode? = null
-    var result: ListNode? = null
-    var flag = 0
-    while (p1 != null) {
-        if (p1.`val` != `val` ) {
-            if (flag == 0) {
-                p2 = ListNode(p1.`val`)
-                result = p2
-                flag = -1
-            }else{
-                p2?.next = ListNode(p1.`val`)
-                p2 = p2?.next
-            }
-        }
-        p1 = p1.next
-    }
-    return result
-}
+// fun removeElements(head: ListNode?, `val`: Int): ListNode? {
+//     // 空间换时间
+//     var p1 = head
+//     var p2: ListNode? = null
+//     var result: ListNode? = null
+//     var flag = 0
+//     while (p1 != null) {
+//         if (p1.`val` != `val` ) {
+//             if (flag == 0) {
+//                 p2 = ListNode(p1.`val`)
+//                 result = p2
+//                 flag = -1
+//             }else{
+//                 p2?.next = ListNode(p1.`val`)
+//                 p2 = p2?.next
+//             }
+//         }
+//         p1 = p1.next
+//     }
+//     return result
+// }
