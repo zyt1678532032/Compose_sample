@@ -1,5 +1,7 @@
 package 位运算
 
+import TreeNode
+
 // 318.最大单词长度乘积
 fun maxProduct(words: Array<String>): Int {
     val masks = IntArray(words.size)
@@ -19,4 +21,22 @@ fun maxProduct(words: Array<String>): Int {
         }
     }
     return result
+}
+
+// 563. 二叉树的坡度
+class Solution {
+    var result = 0
+    fun findTilt(root: TreeNode?): Int {
+        changeTreeVal(root)
+        return result
+    }
+    fun changeTreeVal(root: TreeNode?) {
+        if (root == null) {
+            return
+        }
+        changeTreeVal(root.left)
+        changeTreeVal(root.right)
+        result += Math.abs((root.left?.`val` ?: 0) - (root.right?.`val` ?: 0))
+        root.`val` += (root.left?.`val` ?: 0) + (root.right?.`val` ?: 0)
+    }
 }
