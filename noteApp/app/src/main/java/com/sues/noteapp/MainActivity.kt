@@ -46,9 +46,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.gson.Gson
 import com.sues.noteapp.component.*
@@ -67,17 +70,18 @@ class MainActivity : ComponentActivity() {
     lateinit var registerForActivityResult: ActivityResultLauncher<Void>
     lateinit var registerPermission: ActivityResultLauncher<String>
 
-
     companion object {
         // 获取权限
         const val REQUEST_CODE_STORAGE_PERMISSION = 1
         const val REQUEST_CODE_SELECT_IMAGE = 2
     }
 
+    @OptIn(
+        ExperimentalFoundationApi::class,
+        ExperimentalAnimationApi::class,
+        ExperimentalMaterialApi::class
+    )
     @SuppressLint("LongLogTag")
-    @ExperimentalFoundationApi
-    @ExperimentalAnimationApi
-    @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // installSplashScreen()
@@ -153,8 +157,8 @@ fun getPathFromUri(imageUri: Uri?, contentResolver: ContentResolver): String? {
     return filePath
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @ExperimentalFoundationApi
-@ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
 fun NavGraph(
@@ -164,9 +168,10 @@ fun NavGraph(
     imagePathUri: Uri?,
     contentResolver: ContentResolver
 ) {
-    val navController = rememberAnimatedNavController()
-    AnimatedNavHost(navController = navController, startDestination = "search") {
-        composable("search") {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = "search") {
+        composable(route = "search") {
             Search(
                 navController = navController,
                 noteViewModel = noteViewModel,
