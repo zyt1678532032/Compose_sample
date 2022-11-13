@@ -30,7 +30,6 @@ fun EditNote(
     navController: NavHostController,
     noteViewModel: NoteViewModel,
     context: Context,
-    activity: MainActivity,
     contentResolver: ContentResolver
 ) {
     val (title, changeTitle) = remember {
@@ -47,7 +46,7 @@ fun EditNote(
 
     // 选中颜色
     val selectedColor = remember {
-        mutableStateOf(note.color)
+        mutableStateOf(note.selectedColor)
     }
     val imagePath by remember {
         mutableStateOf(note.imagePath)
@@ -61,9 +60,8 @@ fun EditNote(
             SheetContent(
                 scope = scope,
                 scaffoldState = scaffoldState,
-                selectedColor = selectedColor,
                 context = context,
-                activity = activity
+                selectedColor = selectedColor
             )
         },
         sheetPeekHeight = 60.dp,
@@ -85,7 +83,7 @@ fun EditNote(
             AddNoteTopBar(
                 navController = navController,
             ) {
-                note.color = selectedColor.value
+                note.selectedColor = selectedColor.value
                 noteViewModel.updateNote(note)
             }
         }) {

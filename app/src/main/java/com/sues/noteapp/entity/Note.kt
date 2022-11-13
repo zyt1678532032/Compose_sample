@@ -9,5 +9,5 @@ data class Note(
     var dateTime: String,
     var noteText: String,
     var imagePath: String? = null,
-    var color: SelectedColor = SelectedColor.Color1,
+    var selectedColor: SelectedColor = SelectedColor.Color1,
 )

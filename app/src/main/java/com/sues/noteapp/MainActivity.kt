@@ -102,8 +102,7 @@ class MainActivity : ComponentActivity() {
             NoteAPPTheme {
                 NavGraph(
                     noteViewModel = noteViewModel,
-                    context = applicationContext,
-                    activity = this,
+                    context = this,
                     contentResolver = contentResolver,
                     imagePathUri = imageUriState
                 )

@@ -49,7 +49,6 @@ fun AddNote(
     navController: NavHostController,
     noteViewModel: NoteViewModel,
     context: Context,
-    activity: MainActivity,
     contentResolver: ContentResolver,
     imagePathUri: Uri?
 ) {
@@ -64,12 +63,10 @@ fun AddNote(
             .format(Date())
         mutableStateOf(time)
     }
-
     // 选中颜色
     val selectedColor = remember {
         mutableStateOf(SelectedColor.Color1)
     }
-
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
 
@@ -78,9 +75,8 @@ fun AddNote(
             SheetContent(
                 scope,
                 scaffoldState,
-                selectedColor,
                 context,
-                activity
+                selectedColor
             )
         },
         sheetPeekHeight = 60.dp,
@@ -115,7 +111,7 @@ fun AddNote(
                             title = title,
                             noteText = noteContent,
                             dateTime = dateTime,
-                            color = selectedColor.value,
+                            selectedColor = selectedColor.value,
                             // Fixme: 添加imagePath
                             imagePath = getPathFromUri(
                                 imageUri = imagePathUri,
@@ -190,28 +186,9 @@ fun AddNote(
 fun SheetContent(
     scope: CoroutineScope,
     scaffoldState: BottomSheetScaffoldState,
-    selectedColor: MutableState<SelectedColor>,
     context: Context,
-    activity: MainActivity
+    selectedColor: MutableState<SelectedColor>
 ) {
-
-    // 颜色选择器
-    // Fixme: 2021/9/13 颜色选择需要修改
-    var colorState1 by remember {
-        mutableStateOf(true)
-    }
-    var colorState2 by remember {
-        mutableStateOf(false)
-    }
-    var colorState3 by remember {
-        mutableStateOf(false)
-    }
-    var colorState4 by remember {
-        mutableStateOf(false)
-    }
-    var colorState5 by remember {
-        mutableStateOf(false)
-    }
     Box(
         Modifier
             .fillMaxWidth()
@@ -223,7 +200,6 @@ fun SheetContent(
     ) {
         Text("Swipe up to expand sheet", color = colorWhite, fontWeight = FontWeight.Bold)
     }
-
     Column(
         Modifier
             .fillMaxWidth()
@@ -235,133 +211,51 @@ fun SheetContent(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            IconButton(onClick = {
-                if (!colorState1) { // false
-                    // 其他的变为false
-                    colorState1 = false
-                    colorState2 = false
-                    colorState3 = false
-                    colorState4 = false
-                    colorState5 = false
-                    colorState1 = true
-                    selectedColor.value = SelectedColor.Color1
-
+            SelectedColorChangeByOnClick(
+                selectedColor = selectedColor.value,
+                currentColor = SelectedColor.Color1,
+                onClick = {
+                    if (selectedColor.value != SelectedColor.Color1) {
+                        selectedColor.value = SelectedColor.Color1
+                    }
                 }
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_done),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .clip(
-                            RoundedCornerShape(35.dp)
-                        )
-                        .background(colorPrimaryDark)
-                        .size(40.dp)
-                        .padding(5.dp),
-                    tint = if (colorState1) colorWhite else colorPrimaryDark
-                )
-            }
-            IconButton(onClick = {
-                if (!colorState2) { // false
-                    // 其他的变为false
-                    colorState1 = false
-                    colorState2 = false
-                    colorState3 = false
-                    colorState4 = false
-                    colorState5 = false
-                    colorState2 = true
-                    selectedColor.value = SelectedColor.Color2
+            )
+            SelectedColorChangeByOnClick(
+                selectedColor = selectedColor.value,
+                currentColor = SelectedColor.Color2,
+                onClick = {
+                    if (selectedColor.value != SelectedColor.Color2) {
+                        selectedColor.value = SelectedColor.Color2
+                    }
                 }
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_done),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .clip(
-                            RoundedCornerShape(35.dp)
-                        )
-                        .background(colorNoteColor2)
-                        .size(40.dp)
-                        .padding(5.dp),
-                    tint = if (colorState2) colorWhite else colorNoteColor2
-                )
-            }
-            IconButton(onClick = {
-                if (!colorState3) { // false
-                    // 其他的变为false
-                    colorState1 = false
-                    colorState2 = false
-                    colorState3 = false
-                    colorState4 = false
-                    colorState5 = false
-                    colorState3 = true
-                    selectedColor.value = SelectedColor.Color3
-
+            )
+            SelectedColorChangeByOnClick(
+                selectedColor = selectedColor.value,
+                currentColor = SelectedColor.Color3,
+                onClick = {
+                    if (selectedColor.value != SelectedColor.Color3) {
+                        selectedColor.value = SelectedColor.Color3
+                    }
                 }
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_done),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .clip(
-                            RoundedCornerShape(35.dp)
-                        )
-                        .background(colorNoteColor3)
-                        .size(40.dp)
-                        .padding(5.dp),
-                    tint = if (colorState3) colorWhite else colorNoteColor3
-                )
-            }
-            IconButton(onClick = {
-                if (!colorState4) { // false
-                    // 其他的变为false
-                    colorState1 = false
-                    colorState2 = false
-                    colorState3 = false
-                    colorState4 = false
-                    colorState5 = false
-                    colorState4 = true
-                    selectedColor.value = SelectedColor.Color4
+            )
+            SelectedColorChangeByOnClick(
+                selectedColor = selectedColor.value,
+                currentColor = SelectedColor.Color4,
+                onClick = {
+                    if (selectedColor.value != SelectedColor.Color4) {
+                        selectedColor.value = SelectedColor.Color4
+                    }
                 }
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_done),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .clip(
-                            RoundedCornerShape(35.dp)
-                        )
-                        .background(colorNoteColor4)
-                        .size(40.dp)
-                        .padding(5.dp),
-                    tint = if (colorState4) colorWhite else colorNoteColor4
-                )
-            }
-            IconButton(onClick = {
-                if (!colorState5) { // false
-                    // 其他的变为false
-                    colorState1 = false
-                    colorState2 = false
-                    colorState3 = false
-                    colorState4 = false
-                    colorState5 = false
-                    colorState5 = true
-                    selectedColor.value = SelectedColor.Color5
+            )
+            SelectedColorChangeByOnClick(
+                selectedColor = selectedColor.value,
+                currentColor = SelectedColor.Color5,
+                onClick = {
+                    if (selectedColor.value != SelectedColor.Color5) {
+                        selectedColor.value = SelectedColor.Color5
+                    }
                 }
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_done),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .clip(
-                            RoundedCornerShape(35.dp)
-                        )
-                        .background(colorNoteColor5)
-                        .size(40.dp)
-                        .padding(5.dp),
-                    tint = if (colorState5) colorWhite else colorNoteColor5
-                )
-            }
+            )
             Text(
                 text = "选择颜色",
                 fontWeight = FontWeight.Bold,
@@ -386,9 +280,9 @@ fun SheetContent(
                             Manifest.permission.READ_EXTERNAL_STORAGE
                         ) != PackageManager.PERMISSION_GRANTED
                     ) {
-                        activity.getPermission()
+                        (context as? MainActivity)?.getPermission()
                     } else { // 已经授权
-                        activity.selectImage()
+                        (context as? MainActivity)?.selectImage()
                     }
                 }
         ) {
@@ -402,6 +296,28 @@ fun SheetContent(
                 color = colorWhite
             )
         }
+    }
+}
+
+@Composable
+private fun SelectedColorChangeByOnClick(
+    selectedColor: SelectedColor,
+    currentColor: SelectedColor,
+    onClick: () -> Unit
+) {
+    IconButton(onClick = onClick) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_done),
+            contentDescription = null,
+            modifier = Modifier
+                .clip(
+                    RoundedCornerShape(35.dp)
+                )
+                .background(currentColor.color)
+                .size(40.dp)
+                .padding(5.dp),
+            tint = if (selectedColor == currentColor) colorWhite else currentColor.color
+        )
     }
 }
 
@@ -439,14 +355,7 @@ fun NoteItem(
     deletedState: MutableState<Boolean>
 ) {
     // 颜色数据下沉到最后一个Composable函数中
-    val backgroundColor =
-        when (note.color) { // 枚举类
-            SelectedColor.Color1 -> colorPrimaryDark
-            SelectedColor.Color2 -> colorNoteColor2
-            SelectedColor.Color3 -> colorNoteColor3
-            SelectedColor.Color4 -> colorNoteColor4
-            SelectedColor.Color5 -> colorNoteColor5
-        }
+    val backgroundColor = note.selectedColor.color
     Card(
         elevation = 5.dp,
         modifier = Modifier
@@ -528,14 +437,7 @@ fun AddNoteTitle(
     selectedColor: SelectedColor,
     onValueChange: (String) -> Unit
 ) {
-    val backgroundColor =
-        when (selectedColor) { // 枚举类
-            SelectedColor.Color1 -> colorPrimaryDark
-            SelectedColor.Color2 -> colorNoteColor2
-            SelectedColor.Color3 -> colorNoteColor3
-            SelectedColor.Color4 -> colorNoteColor4
-            SelectedColor.Color5 -> colorNoteColor5
-        }
+    val backgroundColor = selectedColor.color
     Row(
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically

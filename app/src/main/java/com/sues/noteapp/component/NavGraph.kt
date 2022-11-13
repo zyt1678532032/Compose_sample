@@ -25,7 +25,6 @@ enum class Screen {
 fun NavGraph(
     noteViewModel: NoteViewModel,
     context: Context,
-    activity: MainActivity,
     imagePathUri: Uri?,
     contentResolver: ContentResolver
 ) {
@@ -42,7 +41,6 @@ fun NavGraph(
                 navController = navController,
                 noteViewModel = noteViewModel,
                 context = context,
-                activity = activity,
                 imagePathUri = imagePathUri,
                 contentResolver = contentResolver
             )
@@ -59,7 +57,6 @@ fun NavGraph(
                 navController = navController,
                 noteViewModel = noteViewModel,
                 context = context,
-                activity = activity,
                 contentResolver = contentResolver
             )
         }
