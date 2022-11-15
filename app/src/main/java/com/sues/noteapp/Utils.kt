@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,7 +24,6 @@ fun getPathFromUri(imageUri: Uri?, contentResolver: ContentResolver): String? {
         // 没有选择图片
         return null
     }
-    // fixme: filepath可以这样定义
     val filePath: String
     val cursor = contentResolver.query(imageUri, null, null, null, null)
     if (cursor == null) {
@@ -39,28 +39,30 @@ fun getPathFromUri(imageUri: Uri?, contentResolver: ContentResolver): String? {
 
 
 @Composable
-fun SetImage(imagePath: String, noteViewModel: NoteViewModel) {
+fun SetImage(imagePath: MutableState<String?>) {
     Box {
-        Image(
-            bitmap = BitmapFactory.decodeFile(imagePath).asImageBitmap(),
-            contentDescription = null,
-            modifier = Modifier.clip(RoundedCornerShape(15.dp))
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-        ) {
-            IconButton(
-                onClick = {
-                    // Fixme:删除添加的图片
-                    noteViewModel.imageUri.value = null
-                },
+        imagePath.value?.let {
+            Image(
+                bitmap = BitmapFactory.decodeFile(imagePath.value).asImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier.clip(RoundedCornerShape(15.dp))
+            )
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_delete),
-                    contentDescription = null,
-                    tint = Color.Red
-                )
+                IconButton(
+                    onClick = {
+                        // Fixme:删除添加的图片
+                        imagePath.value = null
+                    },
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_delete),
+                        contentDescription = null,
+                        tint = Color.Red
+                    )
+                }
             }
         }
     }

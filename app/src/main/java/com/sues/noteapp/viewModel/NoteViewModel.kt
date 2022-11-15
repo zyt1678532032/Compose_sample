@@ -16,9 +16,6 @@ class NoteViewModel : ViewModel() {
 
     var imageUri = MutableLiveData<Uri>()
 
-   // private val _note = MutableLiveData<Note>()
-   // val note: LiveData<Note> = _note
-
     fun updateNote(note: Note) {
         val list: MutableList<Note> = _noteList.value!!
         list.forEachIndexed { index, it ->

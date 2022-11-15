@@ -1,5 +1,6 @@
 package com.sues.noteapp.component
 
+import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
 import androidx.compose.foundation.border
@@ -23,37 +24,27 @@ import com.sues.noteapp.viewModel.NoteViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
+@SuppressLint("UnrememberedMutableState")
 @ExperimentalMaterialApi
 @Composable
 fun EditNote(
     note: Note,
     navController: NavHostController,
     noteViewModel: NoteViewModel,
-    context: Context,
-    contentResolver: ContentResolver
+    context: Context
 ) {
-    val (title, changeTitle) = remember {
-        mutableStateOf(note.title)
-    }
-    val (noteContent, changeContent) = remember {
-        mutableStateOf(note.noteText)
-    }
+    val (title, changeTitle) = remember { mutableStateOf(note.title) }
+    val (noteContent, changeContent) = remember { mutableStateOf(note.noteText) }
     val dateTime by remember {
         val time = SimpleDateFormat("yyyy MMMM dd HH:MM a,EEEE", Locale.getDefault())
             .format(Date())
         mutableStateOf(time)
     }
-
-    // 选中颜色
-    val selectedColor = remember {
-        mutableStateOf(note.selectedColor)
-    }
-    val imagePath by remember {
-        mutableStateOf(note.imagePath)
-    }
-
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
+    // 选中颜色
+    val selectedColor = remember { mutableStateOf(note.selectedColor) }
+    val imagePathState = remember { mutableStateOf<String?>(note.imagePath) }
 
     BottomSheetScaffold(
         sheetContent = {
@@ -94,42 +85,24 @@ fun EditNote(
                 .fillMaxWidth()
                 .padding(bottom = 70.dp)
         ) {
-
             item {
-                //AddNoteTitle(title = title, onValueChange = changeTitle)
                 AddNoteTitle(
                     title = title!!,
                     selectedColor = selectedColor.value,
                     onValueChange = changeTitle
                 )
                 // Fixme:这里好像也有问题(时间信息显示)
-                Row(
+                Text(
                     modifier = Modifier
                         .fillMaxWidth(0.96f)
-                        .padding(top = 5.dp, bottom = 5.dp)
-                ) {
-                    Text(text = dateTime, color = colorIcons)
-                }
-
-                Spacer(
-                    modifier = Modifier
-                        .height(10.dp)
+                        .padding(top = 5.dp, bottom = 5.dp),
+                    text = dateTime,
+                    color = colorIcons
                 )
+                Spacer(modifier = Modifier.height(10.dp))
                 // Fixme: 添加图片布局
-                if (imagePath != null || noteViewModel.imageUri.value != null) {
-                    SetImage(
-                        imagePath = (if (imagePath != null) imagePath else
-                            noteViewModel.imageUri.value.let {
-                                note.imagePath = getPathFromUri(it, contentResolver)
-                                getPathFromUri(it, contentResolver)
-                            }) as String,
-                        noteViewModel = noteViewModel
-                    )
-                }
-                Spacer(
-                    modifier = Modifier
-                        .height(10.dp)
-                )
+                SetImage(imagePath = imagePathState)
+                Spacer(modifier = Modifier.height(10.dp))
                 // 笔记内容体
                 AddNoteContent(noteContent = noteContent, onValueChange = changeContent)
             }

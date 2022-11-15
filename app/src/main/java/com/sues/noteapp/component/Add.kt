@@ -3,10 +3,14 @@ package com.sues.noteapp.component
 import android.Manifest
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -49,26 +53,19 @@ fun AddNote(
     navController: NavHostController,
     noteViewModel: NoteViewModel,
     context: Context,
-    contentResolver: ContentResolver,
-    imagePathUri: Uri?
+    imagePathState: MutableState<String?>,
 ) {
-    val (title, changeTitle) = remember {
-        mutableStateOf("")
-    }
-    val (noteContent, changeContent) = remember {
-        mutableStateOf("")
-    }
+    val (title, changeTitle) = remember { mutableStateOf("") }
+    val (noteContent, changeContent) = remember { mutableStateOf("") }
     val dateTime by remember {
-        val time = SimpleDateFormat("yyyy MMMM dd HH:MM a,EEEE", Locale.getDefault())
-            .format(Date())
+        val time = SimpleDateFormat("yyyy MMMM dd HH:MM a,EEEE", Locale.getDefault()).format(Date())
         mutableStateOf(time)
-    }
-    // 选中颜色
-    val selectedColor = remember {
-        mutableStateOf(SelectedColor.Color1)
     }
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
+    // 选中颜色
+    val selectedColor = remember { mutableStateOf(SelectedColor.Color1) }
+    val imagePath = remember { imagePathState }.value
 
     BottomSheetScaffold(
         sheetContent = {
@@ -86,9 +83,8 @@ fun AddNote(
         scaffoldState = scaffoldState,
         snackbarHost = {// 提示框
             SnackbarHost(it) { data ->
-                // custom snackbar with the custom border
                 Snackbar(
-                    modifier = Modifier.border(2.dp, MaterialTheme.colors.secondary),
+                    modifier = Modifier.border(width = 2.dp, color = MaterialTheme.colors.secondary),
                     snackbarData = data,
                     backgroundColor = colorWhite
                 )
@@ -97,12 +93,11 @@ fun AddNote(
         topBar = {
             AddNoteTopBar(
                 navController = navController,
-            ) {
+            ) { // 点击提交按钮
                 if (noteContent.isEmpty()) {
                     scope.launch {
-                        scaffoldState.snackbarHostState.showSnackbar(
-                            message = "笔记内容不能为空!"
-                        )
+                        scaffoldState.snackbarHostState
+                            .showSnackbar(message = "笔记内容不能为空!")
                     }
                 } else {
                     noteViewModel.addNote(
@@ -112,22 +107,17 @@ fun AddNote(
                             noteText = noteContent,
                             dateTime = dateTime,
                             selectedColor = selectedColor.value,
-                            // Fixme: 添加imagePath
-                            imagePath = getPathFromUri(
-                                imageUri = imagePathUri,
-                                contentResolver = contentResolver
-                            )
+                            imagePath = imagePath
                         )
                     )
                     // 添加完一个note将imageUri设置为null,这样在点击添加按钮时就不会出现上一次的图片情况发生了
-                    noteViewModel.imageUri.value = null
+                    imagePathState.value = null
                     navController.navigate(
-                        route = "search",
+                        route = Screen.MainScreen.name,
                         navOptions = NavOptions.Builder()
-                            .setPopUpTo(route = "search", inclusive = true)
+                            .setPopUpTo(route = Screen.MainScreen.name, inclusive = true)
                             .build()
                     )
-                    Log.i("addNote", noteViewModel.noteList.value?.size.toString())
                 }
             }
         }) {
@@ -138,9 +128,7 @@ fun AddNote(
                 .fillMaxWidth()
                 .padding(bottom = 70.dp)
         ) {
-
             item {
-                //AddNoteTitle(title = title, onValueChange = changeTitle)
                 AddNoteTitle(
                     title = title,
                     selectedColor = selectedColor.value,
@@ -154,29 +142,13 @@ fun AddNote(
                 ) {
                     Text(text = dateTime, color = colorIcons)
                 }
-
-                Spacer(
-                    modifier = Modifier
-                        .height(10.dp)
-                )
+                Spacer(modifier = Modifier.height(10.dp))
                 // Fixme: 添加图片布局
-                if (imagePathUri != null) {
-                    SetImage(
-                        imagePath = getPathFromUri(
-                            imageUri = imagePathUri,
-                            contentResolver = contentResolver
-                        )!!,
-                        noteViewModel = noteViewModel
-                    )
-                }
-                Spacer(
-                    modifier = Modifier
-                        .height(10.dp)
-                )
+                SetImage(imagePath = imagePathState)
+                Spacer(modifier = Modifier.height(10.dp))
                 // 笔记内容体
                 AddNoteContent(noteContent = noteContent, onValueChange = changeContent)
             }
-
         }
     }
 }
@@ -190,7 +162,7 @@ fun SheetContent(
     selectedColor: MutableState<SelectedColor>
 ) {
     Box(
-        Modifier
+        modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
             .clickable {
@@ -218,8 +190,7 @@ fun SheetContent(
                     if (selectedColor.value != SelectedColor.Color1) {
                         selectedColor.value = SelectedColor.Color1
                     }
-                }
-            )
+                })
             SelectedColorChangeByOnClick(
                 selectedColor = selectedColor.value,
                 currentColor = SelectedColor.Color2,
@@ -227,8 +198,7 @@ fun SheetContent(
                     if (selectedColor.value != SelectedColor.Color2) {
                         selectedColor.value = SelectedColor.Color2
                     }
-                }
-            )
+                })
             SelectedColorChangeByOnClick(
                 selectedColor = selectedColor.value,
                 currentColor = SelectedColor.Color3,
@@ -236,8 +206,7 @@ fun SheetContent(
                     if (selectedColor.value != SelectedColor.Color3) {
                         selectedColor.value = SelectedColor.Color3
                     }
-                }
-            )
+                })
             SelectedColorChangeByOnClick(
                 selectedColor = selectedColor.value,
                 currentColor = SelectedColor.Color4,
@@ -245,8 +214,7 @@ fun SheetContent(
                     if (selectedColor.value != SelectedColor.Color4) {
                         selectedColor.value = SelectedColor.Color4
                     }
-                }
-            )
+                })
             SelectedColorChangeByOnClick(
                 selectedColor = selectedColor.value,
                 currentColor = SelectedColor.Color5,
@@ -254,8 +222,7 @@ fun SheetContent(
                     if (selectedColor.value != SelectedColor.Color5) {
                         selectedColor.value = SelectedColor.Color5
                     }
-                }
-            )
+                })
             Text(
                 text = "选择颜色",
                 fontWeight = FontWeight.Bold,
@@ -263,37 +230,31 @@ fun SheetContent(
             )
         }
         // 添加图片
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
+        Row(horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp)
                 .clickable {
-                    // Fixme: 底部导航栏添加图片功能
                     scope.launch {
                         scaffoldState.bottomSheetState.collapse()
                     }
-                    // Todo: 权限的获取需要注意一下
                     if (ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.READ_EXTERNAL_STORAGE
+                            context, Manifest.permission.READ_EXTERNAL_STORAGE
                         ) != PackageManager.PERMISSION_GRANTED
                     ) {
                         (context as? MainActivity)?.getPermission()
                     } else { // 已经授权
                         (context as? MainActivity)?.selectImage()
                     }
-                }
-        ) {
+                }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_image),
                 contentDescription = null,
                 tint = colorWhite
             )
             Text(
-                text = "添加图片",
-                color = colorWhite
+                text = "添加图片", color = colorWhite
             )
         }
     }
@@ -310,9 +271,7 @@ private fun SelectedColorChangeByOnClick(
             painter = painterResource(id = R.drawable.ic_done),
             contentDescription = null,
             modifier = Modifier
-                .clip(
-                    RoundedCornerShape(35.dp)
-                )
+                .clip(RoundedCornerShape(35.dp))
                 .background(currentColor.color)
                 .size(40.dp)
                 .padding(5.dp),
@@ -322,7 +281,6 @@ private fun SelectedColorChangeByOnClick(
 }
 
 
-@ExperimentalMaterialApi
 @Composable
 fun AddNoteTopBar(
     navController: NavHostController,
@@ -335,9 +293,9 @@ fun AddNoteTopBar(
         ) {
             AddNoteBackButton {
                 navController.navigate(
-                    route = "search",
+                    route = Screen.MainScreen.name,
                     navOptions = NavOptions.Builder()
-                        .setPopUpTo(route = "search", inclusive = true)
+                        .setPopUpTo(route = Screen.MainScreen.name, inclusive = true)
                         .build()
                 )
             }
@@ -368,7 +326,7 @@ fun NoteItem(
                 }
             ) {
                 if (!deletedState.value) { // 非删除状态下才可以跳转
-                    navController.navigate(route = "editNote")
+                    navController.navigate(route = Screen.EditNoteScreen.name)
                 } else {
                     deletedState.value = false
                 }
@@ -384,9 +342,7 @@ fun NoteItem(
                     Box(
                         modifier = Modifier
                             .padding(5.dp)
-                            .align(
-                                alignment = Alignment.TopEnd
-                            )
+                            .align(alignment = Alignment.TopEnd)
                             .border(
                                 width = 1.dp,
                                 color = colorNoteColor2,
@@ -395,7 +351,6 @@ fun NoteItem(
                             .size(22.dp)
                             .clip(shape = RoundedCornerShape(15.dp))
                             .background(colorNoteColor2)
-                        //.paint(painter = painterResource(id = R.drawable.ic_done))
                     )
                 }
                 Column(
@@ -404,24 +359,22 @@ fun NoteItem(
                 ) {
 
                     // Fixme: 设置搜索界面图片
-                    if (note.imagePath != null) {
+                    note.imagePath?.let {
                         Image(
                             bitmap = BitmapFactory.decodeFile(note.imagePath).asImageBitmap(),
                             contentDescription = null,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
-                    if (note.title != "") {
-                        Text(
-                            text = note.title!!,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 25.sp,
-                            color = colorWhite,
-                            modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 5.dp)
-                        )
-                    }
                     Text(
-                        text = note.noteText,
+                        text = note.title ?: "",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = colorWhite,
+                        modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 5.dp)
+                    )
+                    Text(
+                        text = note.noteText ?: "",
                         maxLines = 2,
                         modifier = Modifier.padding(horizontal = 15.dp, vertical = 5.dp)
                     )
@@ -443,8 +396,7 @@ fun AddNoteTitle(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(
-            modifier = Modifier
-                .width(10.dp)
+            modifier = Modifier.width(10.dp)
         )
         Spacer(
             modifier = Modifier
@@ -454,8 +406,7 @@ fun AddNoteTitle(
                 .background(backgroundColor)
         )
         Spacer(
-            modifier = Modifier
-                .width(13.dp)
+            modifier = Modifier.width(13.dp)
         )
         OutlinedTextField(
             value = title,
@@ -467,23 +418,20 @@ fun AddNoteTitle(
                     fontWeight = FontWeight.Bold
                 )
             },
-            modifier = Modifier
-                .fillMaxWidth(0.96f),
+            modifier = Modifier.fillMaxWidth(0.96f),
             maxLines = 1,
             colors = TextFieldDefaults.outlinedTextFieldColors(textColor = colorWhite)
         )
         Spacer(
-            modifier = Modifier
-                .width(5.dp)
+            modifier = Modifier.width(5.dp)
         )
     }
 }
 
 @Composable
-fun AddNoteContent(noteContent: String, onValueChange: (String) -> Unit) {
-
+fun AddNoteContent(noteContent: String?, onValueChange: (String) -> Unit) {
     OutlinedTextField(
-        value = noteContent,
+        value = noteContent ?: "",
         onValueChange = onValueChange,
         placeholder = {
             Text(
@@ -492,14 +440,12 @@ fun AddNoteContent(noteContent: String, onValueChange: (String) -> Unit) {
                 fontWeight = FontWeight.Bold
             )
         },
-        modifier = Modifier
-            .fillMaxWidth(0.95f),
+        modifier = Modifier.fillMaxWidth(0.95f),
         shape = RoundedCornerShape(10.dp),
         colors = TextFieldDefaults.outlinedTextFieldColors(textColor = colorWhite)
     )
 }
 
-@ExperimentalMaterialApi
 @Composable
 fun AddNoteDoneButton(onClick: () -> Unit) {
     IconButton(
@@ -512,11 +458,7 @@ fun AddNoteDoneButton(onClick: () -> Unit) {
             modifier = Modifier
                 .width(25.dp)
                 .height(24.dp)
-                .border(
-                    width = 2.dp,
-                    color = colorIcons,
-                    shape = RoundedCornerShape(30.dp)
-                )
+                .border(width = 2.dp, color = colorIcons, shape = RoundedCornerShape(30.dp))
                 .padding(5.dp)
         )
     }
@@ -528,8 +470,7 @@ fun AddNoteBackButton(onClick: () -> Unit) {
         Icon(
             painter = painterResource(id = R.drawable.ic_back),
             contentDescription = null,
-            modifier = Modifier
-                .padding(start = 13.dp)
+            modifier = Modifier.padding(start = 13.dp)
         )
     }
 }

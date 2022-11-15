@@ -44,9 +44,7 @@ fun MainScreen(
                 )
             }
         },
-        bottomBar = {
-            SearchBottomAppBar()
-        },
+        bottomBar = { SearchBottomAppBar() },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -57,7 +55,7 @@ fun MainScreen(
                             .build()
                     )
                 },
-                backgroundColor = colorNoteColor2,
+                backgroundColor = SelectedColor.Color2.color,
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_add),
@@ -68,7 +66,7 @@ fun MainScreen(
     ) {
         SearchContent(
             searchText = searchText,
-            notes = noteViewModel.noteList.value!!,
+            notes = noteViewModel.noteList.value,
             onValueChange = changeSearchText,
             navController = navController
         )
@@ -129,14 +127,8 @@ fun SearchContent(
                     tint = colorSearchIcon
                 )
             },
-            label = {
-                Text(
-                    text = "Search notes",
-                    color = colorTextHint,
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth(0.96f),
+            label = { Text(text = "Search notes", color = colorTextHint) },
+            modifier = Modifier.fillMaxWidth(0.96f),
             colors = TextFieldDefaults.outlinedTextFieldColors(textColor = colorWhite)
         )
         StaggeredVerticalGrid(
