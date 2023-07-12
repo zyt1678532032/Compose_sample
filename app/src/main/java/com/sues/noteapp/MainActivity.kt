@@ -30,12 +30,13 @@ class MainActivity : ComponentActivity() {
 
     private val registerForActivityResult: ActivityResultLauncher<Void> =
         registerForActivityResult(object : ActivityResultContract<Void, Uri>() {
-            override fun createIntent(context: Context, input: Void?): Intent {
+            override fun createIntent(context: Context, input: Void): Intent {
                 return Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             }
 
-            override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
-                return intent?.data
+
+            override fun parseResult(resultCode: Int, intent: Intent?): Uri {
+                return intent?.data!!
             }
         }) {
             if (it != null) {

@@ -1,30 +1,40 @@
 package com.sues.noteapp.component
 
-import android.annotation.SuppressLint
-import android.content.ContentResolver
 import android.content.Context
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.Text
+import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.sues.noteapp.MainActivity
 import com.sues.noteapp.SetImage
 import com.sues.noteapp.entity.Note
-import com.sues.noteapp.getPathFromUri
 import com.sues.noteapp.ui.theme.colorIcons
 import com.sues.noteapp.ui.theme.colorMiscellaneousBackground
 import com.sues.noteapp.ui.theme.colorWhite
 import com.sues.noteapp.viewModel.NoteViewModel
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
-@SuppressLint("UnrememberedMutableState")
 @ExperimentalMaterialApi
 @Composable
 fun EditNote(

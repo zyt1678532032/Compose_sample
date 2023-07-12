@@ -100,7 +100,6 @@ fun SearchBottomAppBar() {
     }
 }
 
-@ExperimentalFoundationApi
 @Composable
 fun SearchContent(
     searchText: String,
