@@ -1,13 +1,23 @@
 package com.sues.noteapp.component
 
+import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -25,7 +35,7 @@ import com.sues.noteapp.viewModel.NoteViewModel
 import kotlin.math.ceil
 import kotlin.math.max
 
-@ExperimentalFoundationApi
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun MainScreen(
     navController: NavHostController,
@@ -67,8 +77,8 @@ fun MainScreen(
         SearchContent(
             searchText = searchText,
             notes = noteViewModel.noteList.value,
+            navController = navController,
             onValueChange = changeSearchText,
-            navController = navController
         )
     }
 }
@@ -100,7 +110,6 @@ fun SearchBottomAppBar() {
     }
 }
 
-@ExperimentalFoundationApi
 @Composable
 fun SearchContent(
     searchText: String,
@@ -143,6 +152,84 @@ fun SearchContent(
                         note = it[index],
                         navController = navController,
                         deletedState = deletedState
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NoteItem(
+    note: Note,
+    navController: NavHostController,
+    deletedState: MutableState<Boolean>
+) {
+    // 颜色数据下沉到最后一个Composable函数中
+    val backgroundColor = note.selectedColor.color
+    Card(
+        elevation = 5.dp,
+        modifier = Modifier
+            .alpha(1f)
+            .padding(horizontal = 4.dp, vertical = 4.dp)
+        // .combinedClickable(
+        //     onLongClick = {
+        //         // 显示删除选框
+        //         deletedState.value = true
+        //     }
+        // ) {
+        //     if (!deletedState.value) { // 非删除状态下才可以跳转
+        //         navController.navigate(route = Screen.EditNoteScreen.name)
+        //     } else {
+        //         deletedState.value = false
+        //     }
+        // }
+    ) {
+        Box {
+            Card(
+                backgroundColor = backgroundColor,
+                contentColor = colorWhite,
+                shape = RoundedCornerShape(10.dp),
+            ) {
+                if (deletedState.value) {
+                    Box(
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .align(alignment = Alignment.TopEnd)
+                            .border(
+                                width = 1.dp,
+                                color = colorNoteColor2,
+                                shape = RoundedCornerShape(15.dp)
+                            )
+                            .size(22.dp)
+                            .clip(shape = RoundedCornerShape(15.dp))
+                            .background(colorNoteColor2)
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+
+                    // Fixme: 设置搜索界面图片
+                    note.imagePath?.let {
+                        Image(
+                            bitmap = BitmapFactory.decodeFile(note.imagePath).asImageBitmap(),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    Text(
+                        text = note.title ?: "",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        color = colorWhite,
+                        modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 5.dp)
+                    )
+                    Text(
+                        text = note.noteText ?: "",
+                        maxLines = 2,
+                        modifier = Modifier.padding(horizontal = 15.dp, vertical = 5.dp)
                     )
                 }
             }

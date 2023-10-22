@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.sues.noteapp.viewModel.NoteViewModel
 
 fun getPathFromUri(imageUri: Uri?, contentResolver: ContentResolver): String? {
     if (imageUri == null) {

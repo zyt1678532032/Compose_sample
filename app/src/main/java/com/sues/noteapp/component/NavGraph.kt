@@ -18,7 +18,6 @@ enum class Screen {
     EditNoteScreen
 }
 
-@ExperimentalFoundationApi
 @ExperimentalMaterialApi
 @Composable
 fun NavGraph(
@@ -42,7 +41,7 @@ fun NavGraph(
                 imagePathState = imagePathState
             )
         }
-        composable(route = Screen.EditNoteScreen.name) { entry ->
+        composable(route = Screen.EditNoteScreen.name) {
             // FIXME: 编辑功能
             val note = Note(
                 id = 1,

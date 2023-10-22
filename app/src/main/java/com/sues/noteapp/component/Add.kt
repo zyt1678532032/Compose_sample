@@ -1,51 +1,66 @@
 package com.sues.noteapp.component
 
 import android.Manifest
-import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
-import android.net.Uri
-import android.provider.MediaStore
-import android.util.Log
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContract
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.BottomSheetScaffoldState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.focus.focusOrder
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
-import androidx.navigation.navOptions
 import com.sues.noteapp.MainActivity
-import com.sues.noteapp.R // app图片等资源
+import com.sues.noteapp.R
 import com.sues.noteapp.SetImage
 import com.sues.noteapp.entity.Note
-import com.sues.noteapp.getPathFromUri
-import com.sues.noteapp.ui.theme.*
+import com.sues.noteapp.ui.theme.SelectedColor
+import com.sues.noteapp.ui.theme.colorIcons
+import com.sues.noteapp.ui.theme.colorMiscellaneousBackground
+import com.sues.noteapp.ui.theme.colorWhite
 import com.sues.noteapp.viewModel.NoteViewModel
+import com.sues.noteapp.viewModel.noteId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 @ExperimentalMaterialApi
 @Composable
@@ -102,7 +117,7 @@ fun AddNote(
                 } else {
                     noteViewModel.addNote(
                         Note(
-                            id = 1,
+                            id = noteId,
                             title = title,
                             noteText = noteContent,
                             dateTime = dateTime,
@@ -110,6 +125,7 @@ fun AddNote(
                             imagePath = imagePath
                         )
                     )
+                    noteId++ // 更新id
                     // 添加完一个note将imageUri设置为null,这样在点击添加按钮时就不会出现上一次的图片情况发生了
                     imagePathState.value = null
                     navController.navigate(
@@ -301,85 +317,6 @@ fun AddNoteTopBar(
             }
             Spacer(modifier = Modifier.fillMaxWidth(0.85f))
             AddNoteDoneButton(onClick = onClick)
-        }
-    }
-}
-
-@ExperimentalFoundationApi
-@Composable
-fun NoteItem(
-    note: Note,
-    navController: NavHostController,
-    deletedState: MutableState<Boolean>
-) {
-    // 颜色数据下沉到最后一个Composable函数中
-    val backgroundColor = note.selectedColor.color
-    Card(
-        elevation = 5.dp,
-        modifier = Modifier
-            .alpha(1f)
-            .padding(horizontal = 4.dp, vertical = 4.dp)
-            .combinedClickable(
-                onLongClick = {
-                    // 显示删除选框
-                    deletedState.value = true
-                }
-            ) {
-                if (!deletedState.value) { // 非删除状态下才可以跳转
-                    navController.navigate(route = Screen.EditNoteScreen.name)
-                } else {
-                    deletedState.value = false
-                }
-            }
-    ) {
-        Box {
-            Card(
-                backgroundColor = backgroundColor,
-                contentColor = colorWhite,
-                shape = RoundedCornerShape(10.dp),
-            ) {
-                if (deletedState.value) {
-                    Box(
-                        modifier = Modifier
-                            .padding(5.dp)
-                            .align(alignment = Alignment.TopEnd)
-                            .border(
-                                width = 1.dp,
-                                color = colorNoteColor2,
-                                shape = RoundedCornerShape(15.dp)
-                            )
-                            .size(22.dp)
-                            .clip(shape = RoundedCornerShape(15.dp))
-                            .background(colorNoteColor2)
-                    )
-                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-
-                    // Fixme: 设置搜索界面图片
-                    note.imagePath?.let {
-                        Image(
-                            bitmap = BitmapFactory.decodeFile(note.imagePath).asImageBitmap(),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    Text(
-                        text = note.title ?: "",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 25.sp,
-                        color = colorWhite,
-                        modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 5.dp)
-                    )
-                    Text(
-                        text = note.noteText ?: "",
-                        maxLines = 2,
-                        modifier = Modifier.padding(horizontal = 15.dp, vertical = 5.dp)
-                    )
-                }
-            }
         }
     }
 }

@@ -16,8 +16,6 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import com.sues.noteapp.component.NavGraph
 import com.sues.noteapp.ui.theme.NoteAPPTheme
@@ -28,9 +26,9 @@ class MainActivity : ComponentActivity() {
     private val noteViewModel by viewModels<NoteViewModel>()
     private val imagePathState: MutableState<String?> = mutableStateOf(null)
 
-    private val registerForActivityResult: ActivityResultLauncher<Void> =
-        registerForActivityResult(object : ActivityResultContract<Void, Uri>() {
-            override fun createIntent(context: Context, input: Void?): Intent {
+    private val activityResultLauncher: ActivityResultLauncher<Void> =
+        registerForActivityResult(object : ActivityResultContract<Void, Uri?>() {
+            override fun createIntent(context: Context, input: Void): Intent {
                 return Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             }
 
@@ -74,7 +72,7 @@ class MainActivity : ComponentActivity() {
     }
 
     fun selectImage() {
-        registerForActivityResult.launch(null)
+        activityResultLauncher.launch(null)
     }
 
 }

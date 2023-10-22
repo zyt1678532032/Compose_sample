@@ -1,12 +1,10 @@
 package com.sues.noteapp.viewModel
 
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.sues.noteapp.entity.Note
-import java.net.URI
 
 class NoteViewModel : ViewModel() {
 
@@ -29,6 +27,8 @@ class NoteViewModel : ViewModel() {
         _noteList.value?.add(note)
     }
 }
+
+var noteId = 4
 
 val notes = mutableListOf(
     Note(
