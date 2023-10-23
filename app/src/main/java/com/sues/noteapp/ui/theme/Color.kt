@@ -1,6 +1,5 @@
 package com.sues.noteapp.ui.theme
 
-import android.annotation.SuppressLint
 import androidx.compose.ui.graphics.Color
 
 val colorPrimaryDark = Color(0xFF292929)
@@ -9,7 +8,7 @@ val colorAccount = Color(0xFFFDBE38)
 
 val colorWhite = Color(0xFFFFFFFF)
 val colorSearchIcon = Color(0xFFDBDBDB)
-val colorTextHint = Color(0xFF4CAF50)
+val colorTextHint = Color(0xFFFFFFFF)
 val colorQuickActionsBackground = Color(0xFF2F2D2E)
 val colorIcons = Color(0xFFA4A4A4)
 val colorTextSubtitle = Color(0xFFCECECE)
