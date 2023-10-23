@@ -1,23 +1,43 @@
 package com.sues.noteapp.component
 
-import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.BottomAppBar
+import androidx.compose.material.Card
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -30,12 +50,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import com.sues.noteapp.R
 import com.sues.noteapp.entity.Note
-import com.sues.noteapp.ui.theme.*
+import com.sues.noteapp.ui.theme.SelectedColor
+import com.sues.noteapp.ui.theme.colorNoteColor2
+import com.sues.noteapp.ui.theme.colorSearchIcon
+import com.sues.noteapp.ui.theme.colorTextHint
+import com.sues.noteapp.ui.theme.colorWhite
 import com.sues.noteapp.viewModel.NoteViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlin.math.ceil
 import kotlin.math.max
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun MainScreen(
     navController: NavHostController,
@@ -44,6 +69,9 @@ fun MainScreen(
     val (searchText, changeSearchText) = remember {
         mutableStateOf("")
     }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
         topBar = {
             TopAppBar {
@@ -54,7 +82,8 @@ fun MainScreen(
                 )
             }
         },
-        bottomBar = { SearchBottomAppBar() },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        bottomBar = { SearchBottomAppBar(scope, snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -75,6 +104,7 @@ fun MainScreen(
         }
     ) {
         SearchContent(
+            padding = it,
             searchText = searchText,
             notes = noteViewModel.noteList.value,
             navController = navController,
@@ -84,23 +114,39 @@ fun MainScreen(
 }
 
 @Composable
-fun SearchBottomAppBar() {
+fun SearchBottomAppBar(
+    scope: CoroutineScope,
+    snackbarHostState: SnackbarHostState
+) {
+
     BottomAppBar(contentPadding = PaddingValues(start = 10.dp, end = 10.dp)) {
-        IconButton(onClick = { /*TODO*/ }) {
+        IconButton(onClick = {
+            scope.launch {
+                snackbarHostState.showSnackbar("function not support")
+            }
+        }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_add_outline),
                 contentDescription = "添加",
                 modifier = Modifier.padding(horizontal = 10.dp)
             )
         }
-        IconButton(onClick = { /*TODO*/ }) {
+        IconButton(onClick = {
+            scope.launch {
+                snackbarHostState.showSnackbar("function not support")
+            }
+        }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_image),
                 contentDescription = "添加图片",
                 modifier = Modifier.padding(horizontal = 10.dp)
             )
         }
-        IconButton(onClick = { /*TODO*/ }) {
+        IconButton(onClick = {
+            scope.launch {
+                snackbarHostState.showSnackbar("function not support")
+            }
+        }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_web_link),
                 contentDescription = "添加浏览地址",
@@ -112,6 +158,7 @@ fun SearchBottomAppBar() {
 
 @Composable
 fun SearchContent(
+    padding: PaddingValues,
     searchText: String,
     notes: List<Note>? = null,
     navController: NavHostController,
@@ -124,7 +171,9 @@ fun SearchContent(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(paddingValues = padding)
     ) {
         OutlinedTextField(
             value = searchText,
@@ -172,18 +221,22 @@ fun NoteItem(
         modifier = Modifier
             .alpha(1f)
             .padding(horizontal = 4.dp, vertical = 4.dp)
-        // .combinedClickable(
-        //     onLongClick = {
-        //         // 显示删除选框
-        //         deletedState.value = true
-        //     }
-        // ) {
-        //     if (!deletedState.value) { // 非删除状态下才可以跳转
-        //         navController.navigate(route = Screen.EditNoteScreen.name)
-        //     } else {
-        //         deletedState.value = false
-        //     }
-        // }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onLongPress = {
+                        // 显示删除选框
+                        deletedState.value = true
+                        println("longClick")
+                    },
+                    onTap = {
+                        if (!deletedState.value) { // 非删除状态下才可以跳转
+                            navController.navigate(route = Screen.EditNoteScreen.name)
+                        } else {
+                            deletedState.value = false
+                        }
+                    }
+                )
+            }
     ) {
         Box {
             Card(
