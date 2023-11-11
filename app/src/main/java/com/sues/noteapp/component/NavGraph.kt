@@ -1,14 +1,13 @@
 package com.sues.noteapp.component
 
 import android.content.Context
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.sues.noteapp.entity.Note
+import com.sues.noteapp.data.local.Note
 import com.sues.noteapp.viewModel.NoteViewModel
 
 // 导航枚举类

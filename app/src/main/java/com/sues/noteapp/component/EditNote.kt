@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.sues.noteapp.SetImage
-import com.sues.noteapp.entity.Note
+import com.sues.noteapp.data.local.Note
 import com.sues.noteapp.ui.theme.colorIcons
 import com.sues.noteapp.ui.theme.colorMiscellaneousBackground
 import com.sues.noteapp.ui.theme.colorWhite

@@ -49,7 +49,7 @@ import androidx.navigation.NavOptions
 import com.sues.noteapp.MainActivity
 import com.sues.noteapp.R
 import com.sues.noteapp.SetImage
-import com.sues.noteapp.entity.Note
+import com.sues.noteapp.data.local.Note
 import com.sues.noteapp.ui.theme.SelectedColor
 import com.sues.noteapp.ui.theme.colorIcons
 import com.sues.noteapp.ui.theme.colorMiscellaneousBackground

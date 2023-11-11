@@ -4,27 +4,47 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.sues.noteapp.entity.Note
+import androidx.lifecycle.viewModelScope
+import com.sues.noteapp.data.NoteRepository
+import com.sues.noteapp.data.local.Note
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class NoteViewModel : ViewModel() {
+class NoteViewModel(
+    private val noteRepository: NoteRepository
+) : ViewModel() {
 
     // 搜索界面Note展示
-    private val _noteList = MutableLiveData(notes)
-    val noteList: LiveData<MutableList<Note>> = _noteList
+    private val _noteList: MutableLiveData<List<Note>> = MutableLiveData()
+    val noteList: LiveData<List<Note>> = _noteList
 
     var imageUri = MutableLiveData<Uri>()
 
     fun updateNote(note: Note) {
-        val list: MutableList<Note> = _noteList.value!!
-        list.forEachIndexed { index, it ->
-            if (it.id == note.id) {
-                list[index] = note
+
+    }
+
+    fun addNote(note: Note) {
+    }
+
+    fun insertNote(vararg notes: Note) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                noteRepository.insertNotes(*notes)
             }
         }
     }
 
-    fun addNote(note: Note) {
-        _noteList.value?.add(note)
+    suspend fun getAllNotes(): List<Note> {
+        val notes = viewModelScope.async {
+            withContext(Dispatchers.IO) {
+                noteRepository.getAllNote()
+            }
+        }.await()
+        return notes
     }
 }
 

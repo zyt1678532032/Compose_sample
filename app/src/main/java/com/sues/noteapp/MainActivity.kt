@@ -16,13 +16,32 @@ import androidx.activity.viewModels
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.sues.noteapp.component.NavGraph
+import com.sues.noteapp.data.NoteRepositoryImpl
 import com.sues.noteapp.ui.theme.NoteAPPTheme
 import com.sues.noteapp.viewModel.NoteViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    private val noteViewModel by viewModels<NoteViewModel>()
+    private val noteViewModel by viewModels<NoteViewModel>(
+        factoryProducer = {
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return NoteViewModel(
+                        noteRepository = NoteRepositoryImpl(
+                            localDatasource = (application as NoteApplication).noteDatabase.noteDao()
+                        )
+                    ) as T
+                }
+            }
+        }
+    )
     private val imagePathState: MutableState<String?> = mutableStateOf(null)
 
     private val activityResultLauncher: ActivityResultLauncher<Void> =
@@ -49,7 +68,6 @@ class MainActivity : ComponentActivity() {
                 Toast.makeText(this@MainActivity, "申请权限失败", Toast.LENGTH_SHORT).show()
             }
         }
-
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {

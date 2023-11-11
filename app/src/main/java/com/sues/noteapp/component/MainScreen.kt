@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,10 +26,12 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -47,9 +50,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
 import com.sues.noteapp.R
-import com.sues.noteapp.entity.Note
+import com.sues.noteapp.data.local.Note
 import com.sues.noteapp.ui.theme.SelectedColor
 import com.sues.noteapp.ui.theme.colorNoteColor2
 import com.sues.noteapp.ui.theme.colorSearchIcon
@@ -71,6 +73,7 @@ fun MainScreen(
     }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val notesSate = noteViewModel.noteList.observeAsState()
 
     Scaffold(
         topBar = {
@@ -85,21 +88,38 @@ fun MainScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = { SearchBottomAppBar(scope, snackbarHostState) },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    navController.navigate(
-                        route = Screen.AddNoteScreen.name,
-                        navOptions = NavOptions.Builder()
-                            .setPopUpTo(route = Screen.AddNoteScreen.name, inclusive = true)
-                            .build()
+            Row {
+                FloatingActionButton(
+                    onClick = {
+                        // navController.navigate(
+                        //     route = Screen.AddNoteScreen.name,
+                        //     navOptions = NavOptions.Builder()
+                        //         .setPopUpTo(route = Screen.AddNoteScreen.name, inclusive = true)
+                        //         .build()
+                        // )
+                        noteViewModel.insertNote(
+                            Note(
+                                title = "title1",
+                                noteText = "的撒hi大使馆蒂萨dsada",
+                                dateTime = "2021 9-13"
+                            )
+                        )
+                    },
+                    backgroundColor = SelectedColor.Color2.color,
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_add),
+                        contentDescription = null,
                     )
-                },
-                backgroundColor = SelectedColor.Color2.color,
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_add),
-                    contentDescription = null,
-                )
+                }
+                TextButton(onClick = {
+                    scope.launch {
+                        val notes = noteViewModel.getAllNotes()
+                        snackbarHostState.showSnackbar(notes.toString())
+                    }
+                }) {
+                    Text(text = "showData")
+                }
             }
         }
     ) {
