@@ -7,9 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sues.noteapp.data.NoteRepository
 import com.sues.noteapp.data.local.Note
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -23,13 +21,6 @@ class NoteViewModel(
 
     var imageUri = MutableLiveData<Uri>()
 
-    fun updateNote(note: Note) {
-
-    }
-
-    fun addNote(note: Note) {
-    }
-
     fun insertNote(vararg notes: Note) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -38,35 +29,21 @@ class NoteViewModel(
         }
     }
 
+    fun updateNote(note: Note) {
+        viewModelScope.launch {
+            noteRepository.updateNote(note = note)
+        }
+    }
+
+    suspend fun findNoteByTitle(title: String): Note? {
+        return withContext(Dispatchers.IO) {
+            noteRepository.findByTitle(title = title)
+        }
+    }
+
     suspend fun getAllNotes(): List<Note> {
-        val notes = viewModelScope.async {
-            withContext(Dispatchers.IO) {
-                noteRepository.getAllNote()
-            }
-        }.await()
-        return notes
+        return withContext(Dispatchers.IO) {
+            noteRepository.getAllNote()
+        }
     }
 }
-
-var noteId = 4
-
-val notes = mutableListOf(
-    Note(
-        id = 1,
-        title = "title1",
-        noteText = "的撒hi大使馆蒂萨dsada",
-        dateTime = "2021 9-13"
-    ),
-    Note(
-        id = 2,
-        title = "title1",
-        noteText = "的撒hi大使馆蒂萨dsada",
-        dateTime = "2021 9-13"
-    ),
-    Note(
-        id = 3,
-        title = "title1",
-        noteText = "的撒hi大使馆蒂萨dsada",
-        dateTime = "2021 9-13"
-    ),
-)

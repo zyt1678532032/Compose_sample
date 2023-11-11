@@ -55,7 +55,6 @@ import com.sues.noteapp.ui.theme.colorIcons
 import com.sues.noteapp.ui.theme.colorMiscellaneousBackground
 import com.sues.noteapp.ui.theme.colorWhite
 import com.sues.noteapp.viewModel.NoteViewModel
-import com.sues.noteapp.viewModel.noteId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -115,9 +114,8 @@ fun AddNote(
                             .showSnackbar(message = "笔记内容不能为空!")
                     }
                 } else {
-                    noteViewModel.addNote(
+                    noteViewModel.insertNote(
                         Note(
-                            id = noteId,
                             title = title,
                             noteText = noteContent,
                             dateTime = dateTime,
@@ -125,7 +123,6 @@ fun AddNote(
                             imagePath = imagePath
                         )
                     )
-                    noteId++ // 更新id
                     // 添加完一个note将imageUri设置为null,这样在点击添加按钮时就不会出现上一次的图片情况发生了
                     imagePathState.value = null
                     navController.navigate(

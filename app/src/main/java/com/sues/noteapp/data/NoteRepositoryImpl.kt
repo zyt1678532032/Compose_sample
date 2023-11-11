@@ -13,7 +13,7 @@ class NoteRepositoryImpl(
         return localDatasource.getAll()
     }
 
-    override suspend fun findByTitle(title: String): Note {
+    override suspend fun findByTitle(title: String): Note? {
         return localDatasource.findByTitle(title)
     }
 
@@ -23,5 +23,9 @@ class NoteRepositoryImpl(
 
     override suspend fun deleteNote(note: Note) {
         localDatasource.delete(note)
+    }
+
+    override suspend fun updateNote(note: Note) {
+        localDatasource.update(note)
     }
 }

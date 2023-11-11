@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 
 @Dao
 interface NoteDao {
@@ -16,11 +17,14 @@ interface NoteDao {
             WHERE title LIKE :title LIMIT 1
         """
     )
-    fun findByTitle(title: String): Note
+    fun findByTitle(title: String): Note?
 
     @Insert
     fun insertAll(vararg notes: Note)
 
     @Delete
     fun delete(note: Note)
+
+    @Update
+    fun update(note: Note)
 }

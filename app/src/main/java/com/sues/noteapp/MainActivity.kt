@@ -18,13 +18,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import com.sues.noteapp.component.NavGraph
 import com.sues.noteapp.data.NoteRepositoryImpl
 import com.sues.noteapp.ui.theme.NoteAPPTheme
 import com.sues.noteapp.viewModel.NoteViewModel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 

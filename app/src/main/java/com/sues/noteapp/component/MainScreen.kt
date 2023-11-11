@@ -31,7 +31,6 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,6 +49,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptions
 import com.sues.noteapp.R
 import com.sues.noteapp.data.local.Note
 import com.sues.noteapp.ui.theme.SelectedColor
@@ -73,7 +73,6 @@ fun MainScreen(
     }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val notesSate = noteViewModel.noteList.observeAsState()
 
     Scaffold(
         topBar = {
@@ -91,18 +90,11 @@ fun MainScreen(
             Row {
                 FloatingActionButton(
                     onClick = {
-                        // navController.navigate(
-                        //     route = Screen.AddNoteScreen.name,
-                        //     navOptions = NavOptions.Builder()
-                        //         .setPopUpTo(route = Screen.AddNoteScreen.name, inclusive = true)
-                        //         .build()
-                        // )
-                        noteViewModel.insertNote(
-                            Note(
-                                title = "title1",
-                                noteText = "的撒hi大使馆蒂萨dsada",
-                                dateTime = "2021 9-13"
-                            )
+                        navController.navigate(
+                            route = Screen.AddNoteScreen.name,
+                            navOptions = NavOptions.Builder()
+                                .setPopUpTo(route = Screen.AddNoteScreen.name, inclusive = true)
+                                .build()
                         )
                     },
                     backgroundColor = SelectedColor.Color2.color,
@@ -114,8 +106,9 @@ fun MainScreen(
                 }
                 TextButton(onClick = {
                     scope.launch {
-                        val notes = noteViewModel.getAllNotes()
-                        snackbarHostState.showSnackbar(notes.toString())
+                        // val notes = noteViewModel.getAllNotes()
+                        val note = noteViewModel.findNoteByTitle(title = "title1")
+                        snackbarHostState.showSnackbar(note?.toString() ?: "null")
                     }
                 }) {
                     Text(text = "showData")
