@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,7 +80,7 @@ fun AddNote(
     val scaffoldState = rememberBottomSheetScaffoldState()
     // 选中颜色
     val selectedColor = remember { mutableStateOf(SelectedColor.Color1) }
-    val imagePath = remember { imagePathState }.value
+    var imagePath by remember { imagePathState }
 
     BottomSheetScaffold(
         sheetContent = {
@@ -98,7 +99,10 @@ fun AddNote(
         snackbarHost = {// 提示框
             SnackbarHost(it) { data ->
                 Snackbar(
-                    modifier = Modifier.border(width = 2.dp, color = MaterialTheme.colors.secondary),
+                    modifier = Modifier.border(
+                        width = 2.dp,
+                        color = MaterialTheme.colors.secondary
+                    ),
                     snackbarData = data,
                     backgroundColor = colorWhite
                 )
@@ -157,7 +161,12 @@ fun AddNote(
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 // Fixme: 添加图片布局
-                SetImage(imagePath = imagePathState)
+                SetImage(
+                    imagePath = imagePath,
+                    onIconClick = {
+                        imagePath = null
+                    },
+                )
                 Spacer(modifier = Modifier.height(10.dp))
                 // 笔记内容体
                 AddNoteContent(noteContent = noteContent, onValueChange = changeContent)

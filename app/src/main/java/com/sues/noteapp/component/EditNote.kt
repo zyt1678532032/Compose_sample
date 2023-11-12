@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -56,7 +57,7 @@ fun EditNote(
     val scaffoldState = rememberBottomSheetScaffoldState()
     // 选中颜色
     val selectedColor = remember { mutableStateOf(note.selectedColor) }
-    val imagePathState = remember { mutableStateOf<String?>(note.imagePath) }
+    var imagePath by remember { mutableStateOf(note.imagePath) }
 
     BottomSheetScaffold(
         sheetContent = {
@@ -113,7 +114,7 @@ fun EditNote(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 // Fixme: 添加图片布局
-                SetImage(imagePath = imagePathState)
+                SetImage(imagePath = imagePath, onIconClick = { imagePath = null })
                 Spacer(modifier = Modifier.height(10.dp))
                 // 笔记内容体
                 AddNoteContent(noteContent = noteContent, onValueChange = changeContent)

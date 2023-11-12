@@ -38,30 +38,25 @@ fun getPathFromUri(imageUri: Uri?, contentResolver: ContentResolver): String? {
 
 
 @Composable
-fun SetImage(imagePath: MutableState<String?>) {
+fun SetImage(imagePath: String?, onIconClick: () -> Unit) {
     Box {
-        imagePath.value?.let {
-            Image(
-                bitmap = BitmapFactory.decodeFile(imagePath.value).asImageBitmap(),
-                contentDescription = null,
-                modifier = Modifier.clip(RoundedCornerShape(15.dp))
-            )
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
+        Image(
+            bitmap = BitmapFactory.decodeFile(imagePath).asImageBitmap(),
+            contentDescription = null,
+            modifier = Modifier.clip(RoundedCornerShape(15.dp))
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+        ) {
+            IconButton(
+                onClick = onIconClick,
             ) {
-                IconButton(
-                    onClick = {
-                        // Fixme:删除添加的图片
-                        imagePath.value = null
-                    },
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_delete),
-                        contentDescription = null,
-                        tint = Color.Red
-                    )
-                }
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_delete),
+                    contentDescription = null,
+                    tint = Color.Red
+                )
             }
         }
     }

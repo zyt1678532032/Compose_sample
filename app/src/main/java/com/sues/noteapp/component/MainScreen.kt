@@ -26,16 +26,15 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -70,7 +69,7 @@ fun MainScreen(
     navController: NavHostController,
     noteViewModel: NoteViewModel,
 ) {
-    val (searchText, changeSearchText) = remember {
+    val (searchText, searchTextChanged) = remember {
         mutableStateOf("")
     }
     val scope = rememberCoroutineScope()
@@ -108,15 +107,6 @@ fun MainScreen(
                         contentDescription = null,
                     )
                 }
-                TextButton(onClick = {
-                    scope.launch {
-                        val notes = noteViewModel.getAllNotes()
-                        // val note = noteViewModel.findNoteByTitle(title = "title1")
-                        snackbarHostState.showSnackbar(notes.size.toString())
-                    }
-                }) {
-                    Text(text = "showData")
-                }
             }
         }
     ) {
@@ -125,7 +115,7 @@ fun MainScreen(
             searchText = searchText,
             notes = notesState.value,
             navController = navController,
-            onValueChange = changeSearchText,
+            onValueChange = searchTextChanged,
         )
     }
 }
@@ -135,7 +125,6 @@ fun SearchBottomAppBar(
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState
 ) {
-
     BottomAppBar(contentPadding = PaddingValues(start = 10.dp, end = 10.dp)) {
         IconButton(onClick = {
             scope.launch {
@@ -181,10 +170,6 @@ fun SearchContent(
     navController: NavHostController,
     onValueChange: (String) -> Unit
 ) {
-    // 控制右上角的删除框是否显示
-    val deletedState = remember {
-        mutableStateOf(false)
-    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -212,14 +197,11 @@ fun SearchContent(
                 .padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 70.dp)
                 .verticalScroll(ScrollState(0))
         ) {
-            notes?.let {
-                for (index in it.size - 1 downTo 0) {
-                    NoteItem(
-                        note = it[index],
-                        navController = navController,
-                        deletedState = deletedState
-                    )
-                }
+            notes?.forEach { note ->
+                NoteItem(
+                    note = note,
+                    navController = navController,
+                )
             }
         }
     }
@@ -229,10 +211,13 @@ fun SearchContent(
 fun NoteItem(
     note: Note,
     navController: NavHostController,
-    deletedState: MutableState<Boolean>
 ) {
     // 颜色数据下沉到最后一个Composable函数中
     val backgroundColor = note.selectedColor.color
+    // 控制右上角的删除框是否显示
+    var isDeleted by remember {
+        mutableStateOf(false)
+    }
     Card(
         elevation = 5.dp,
         modifier = Modifier
@@ -242,14 +227,14 @@ fun NoteItem(
                 detectTapGestures(
                     onLongPress = {
                         // 显示删除选框
-                        deletedState.value = true
+                        isDeleted = true
                         println("longClick")
                     },
                     onTap = {
-                        if (!deletedState.value) { // 非删除状态下才可以跳转
+                        if (!isDeleted) { // 非删除状态下才可以跳转
                             navController.navigate(route = Screen.EditNoteScreen.name)
                         } else {
-                            deletedState.value = false
+                            isDeleted = false
                         }
                     }
                 )
@@ -261,7 +246,7 @@ fun NoteItem(
                 contentColor = colorWhite,
                 shape = RoundedCornerShape(10.dp),
             ) {
-                if (deletedState.value) {
+                if (isDeleted) {
                     Box(
                         modifier = Modifier
                             .padding(5.dp)
@@ -280,7 +265,6 @@ fun NoteItem(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-
                     // Fixme: 设置搜索界面图片
                     note.imagePath?.let {
                         Image(
