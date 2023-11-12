@@ -23,10 +23,19 @@ class NoteViewModel(
     // 可以自定创建一个Scope，但是得自己管理生命周期的状态
     private val customerScope = CoroutineScope(Job() + Dispatchers.IO)
 
+    init {
+        viewModelScope.launch {
+            // 三秒后显示内容，不会阻塞UI
+            // delay(3000)
+            _noteList.postValue(getAllNotes())
+        }
+    }
+
     fun insertNote(vararg notes: Note) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 noteRepository.insertNotes(*notes)
+                _noteList.postValue(getAllNotes())
             }
         }
     }
@@ -37,9 +46,9 @@ class NoteViewModel(
         }
     }
 
-    suspend fun findNoteByTitle(title: String): Note? {
+    suspend fun findNoteById(id: Int): Note? {
         return withContext(Dispatchers.IO) {
-            noteRepository.findByTitle(title = title)
+            noteRepository.findNoteById(id = id)
         }
     }
 

@@ -13,8 +13,8 @@ class NoteRepositoryImpl(
         return localDatasource.getAll()
     }
 
-    override suspend fun findByTitle(title: String): Note? {
-        return localDatasource.findByTitle(title)
+    override suspend fun findNoteById(id: Int): Note? {
+        return localDatasource.findNoteById(id)
     }
 
     override suspend fun insertNotes(vararg notes: Note) {

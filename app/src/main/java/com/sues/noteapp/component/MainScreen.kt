@@ -31,6 +31,8 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -74,6 +76,8 @@ fun MainScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val notesState = noteViewModel.noteList.observeAsState()
+
     Scaffold(
         topBar = {
             TopAppBar {
@@ -106,9 +110,9 @@ fun MainScreen(
                 }
                 TextButton(onClick = {
                     scope.launch {
-                        // val notes = noteViewModel.getAllNotes()
-                        val note = noteViewModel.findNoteByTitle(title = "title1")
-                        snackbarHostState.showSnackbar(note?.toString() ?: "null")
+                        val notes = noteViewModel.getAllNotes()
+                        // val note = noteViewModel.findNoteByTitle(title = "title1")
+                        snackbarHostState.showSnackbar(notes.size.toString())
                     }
                 }) {
                     Text(text = "showData")
@@ -119,7 +123,7 @@ fun MainScreen(
         SearchContent(
             padding = it,
             searchText = searchText,
-            notes = noteViewModel.noteList.value,
+            notes = notesState.value,
             navController = navController,
             onValueChange = changeSearchText,
         )
@@ -173,7 +177,7 @@ fun SearchBottomAppBar(
 fun SearchContent(
     padding: PaddingValues,
     searchText: String,
-    notes: List<Note>? = null,
+    notes: List<Note>?,
     navController: NavHostController,
     onValueChange: (String) -> Unit
 ) {

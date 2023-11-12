@@ -1,6 +1,7 @@
 package com.sues.noteapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import java.io.Serializable
 
 val colorPrimaryDark = Color(0xFF292929)
 val colorPrimary = Color(0xFF292929)

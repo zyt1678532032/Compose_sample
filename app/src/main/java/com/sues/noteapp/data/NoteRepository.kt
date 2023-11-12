@@ -6,7 +6,7 @@ import com.sues.noteapp.data.local.Note
 interface NoteRepository {
     suspend fun getAllNote(): List<Note>
 
-    suspend fun findByTitle(title: String): Note?
+    suspend fun findNoteById(id: Int): Note?
 
     suspend fun insertNotes(vararg notes: Note)
 

@@ -18,6 +18,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.sues.noteapp.component.NavGraph
 import com.sues.noteapp.data.NoteRepositoryImpl
 import com.sues.noteapp.ui.theme.NoteAPPTheme
@@ -73,6 +74,7 @@ class MainActivity : ComponentActivity() {
             NoteAPPTheme {
                 NavGraph(
                     noteViewModel = noteViewModel,
+                    scope = noteViewModel.viewModelScope,
                     context = this,
                     imagePathState = imagePathState
                 )

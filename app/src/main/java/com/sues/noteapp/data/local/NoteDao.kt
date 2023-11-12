@@ -14,10 +14,10 @@ interface NoteDao {
     @Query(
         """
             SELECT * FROM note 
-            WHERE title LIKE :title LIMIT 1
+            WHERE id LIKE :id LIMIT 1
         """
     )
-    fun findByTitle(title: String): Note?
+    fun findNoteById(id: Int): Note?
 
     @Insert
     fun insertAll(vararg notes: Note)
