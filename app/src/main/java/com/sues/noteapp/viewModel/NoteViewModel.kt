@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sues.noteapp.data.NoteRepository
 import com.sues.noteapp.data.local.Note
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -21,7 +22,8 @@ class NoteViewModel(
     val noteList: LiveData<List<Note>> = _noteList
 
     // 可以自定创建一个Scope，但是得自己管理生命周期的状态
-    private val customerScope = CoroutineScope(Job() + Dispatchers.IO)
+    private val customerScope =
+        CoroutineScope(CoroutineName("customCoroutine") + Job() + Dispatchers.IO)
 
     init {
         viewModelScope.launch {

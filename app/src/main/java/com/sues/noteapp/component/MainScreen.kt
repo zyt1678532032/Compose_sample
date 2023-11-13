@@ -39,7 +39,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.painterResource
@@ -54,7 +57,6 @@ import androidx.navigation.NavOptions
 import com.sues.noteapp.R
 import com.sues.noteapp.data.local.Note
 import com.sues.noteapp.ui.theme.SelectedColor
-import com.sues.noteapp.ui.theme.colorNoteColor2
 import com.sues.noteapp.ui.theme.colorSearchIcon
 import com.sues.noteapp.ui.theme.colorTextHint
 import com.sues.noteapp.ui.theme.colorWhite
@@ -228,7 +230,6 @@ fun NoteItem(
                     onLongPress = {
                         // 显示删除选框
                         isDeleted = true
-                        println("longClick")
                     },
                     onTap = {
                         if (!isDeleted) { // 非删除状态下才可以跳转
@@ -247,19 +248,22 @@ fun NoteItem(
                 shape = RoundedCornerShape(10.dp),
             ) {
                 if (isDeleted) {
-                    Box(
+                    IconButton(
+                        onClick = { isDeleted = false },
                         modifier = Modifier
-                            .padding(5.dp)
                             .align(alignment = Alignment.TopEnd)
-                            .border(
-                                width = 1.dp,
-                                color = colorNoteColor2,
-                                shape = RoundedCornerShape(15.dp)
-                            )
-                            .size(22.dp)
-                            .clip(shape = RoundedCornerShape(15.dp))
-                            .background(colorNoteColor2)
-                    )
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_done),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(35.dp))
+                                .background(Color.White)
+                                .border(width = 2.dp, color = Color.White)
+                                .size(20.dp),
+                            tint = if (isDeleted) Color.Black else note.selectedColor.color
+                        )
+                    }
                 }
                 Column(
                     modifier = Modifier
