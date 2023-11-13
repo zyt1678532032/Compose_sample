@@ -32,6 +32,11 @@ class NoteViewModel(
     }
 
     fun insertNote(vararg notes: Note) {
+        // viewModelScope.launch(context = Dispatchers.IO) {
+        //     noteRepository.insertNotes(*notes)
+        //     _noteList.postValue(getAllNotes())
+        // }
+        // 与上面的等价
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 noteRepository.insertNotes(*notes)
