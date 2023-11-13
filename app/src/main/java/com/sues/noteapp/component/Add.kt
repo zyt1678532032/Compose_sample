@@ -161,12 +161,14 @@ fun AddNote(
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 // Fixme: 添加图片布局
-                SetImage(
-                    imagePath = imagePath,
-                    onIconClick = {
-                        imagePath = null
-                    },
-                )
+                imagePath?.let {
+                    SetImage(
+                        imagePath = it,
+                        onIconClick = {
+                            imagePath = null
+                        },
+                    )
+                }
                 Spacer(modifier = Modifier.height(10.dp))
                 // 笔记内容体
                 AddNoteContent(noteContent = noteContent, onValueChange = changeContent)

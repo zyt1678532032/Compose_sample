@@ -38,7 +38,7 @@ fun getPathFromUri(imageUri: Uri?, contentResolver: ContentResolver): String? {
 
 
 @Composable
-fun SetImage(imagePath: String?, onIconClick: () -> Unit) {
+fun SetImage(imagePath: String, onIconClick: () -> Unit) {
     Box {
         Image(
             bitmap = BitmapFactory.decodeFile(imagePath).asImageBitmap(),

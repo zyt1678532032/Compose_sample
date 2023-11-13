@@ -75,7 +75,7 @@ fun MainScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val notesState = noteViewModel.noteList.observeAsState()
+    val notes by noteViewModel.noteList.observeAsState()
 
     Scaffold(
         topBar = {
@@ -113,7 +113,7 @@ fun MainScreen(
         SearchContent(
             padding = it,
             searchText = searchText,
-            notes = notesState.value,
+            notes = notes,
             navController = navController,
             onValueChange = searchTextChanged,
         )
@@ -265,10 +265,9 @@ fun NoteItem(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    // Fixme: 设置搜索界面图片
                     note.imagePath?.let {
                         Image(
-                            bitmap = BitmapFactory.decodeFile(note.imagePath).asImageBitmap(),
+                            bitmap = BitmapFactory.decodeFile(it).asImageBitmap(),
                             contentDescription = null,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -418,7 +417,7 @@ fun StaggeredGrid(
 
 @Composable
 @Preview
-fun test() {
+fun TestStaggeredVerticalGrid() {
     StaggeredVerticalGrid(
         maxColumnWidth = 220.dp,
     ) {
