@@ -9,7 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,30 +33,4 @@ fun getPathFromUri(imageUri: Uri?, contentResolver: ContentResolver): String? {
         cursor.close()
     }
     return filePath
-}
-
-
-@Composable
-fun SetImage(imagePath: String, onIconClick: () -> Unit) {
-    Box {
-        Image(
-            bitmap = BitmapFactory.decodeFile(imagePath).asImageBitmap(),
-            contentDescription = null,
-            modifier = Modifier.clip(RoundedCornerShape(15.dp))
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-        ) {
-            IconButton(
-                onClick = onIconClick,
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_delete),
-                    contentDescription = null,
-                    tint = Color.Red
-                )
-            }
-        }
-    }
 }

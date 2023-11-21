@@ -1,8 +1,10 @@
 package com.sues.noteapp.component
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
+import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,15 +43,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import com.sues.noteapp.MainActivity
 import com.sues.noteapp.R
-import com.sues.noteapp.SetImage
 import com.sues.noteapp.data.local.Note
 import com.sues.noteapp.ui.theme.SelectedColor
 import com.sues.noteapp.ui.theme.colorIcons
@@ -65,29 +70,43 @@ import java.util.Locale
 @ExperimentalMaterialApi
 @Composable
 fun AddNote(
+    note: Note? = null,
     navController: NavHostController,
     noteViewModel: NoteViewModel,
-    context: Context,
-    imagePathState: MutableState<String?>,
 ) {
-    val (title, changeTitle) = remember { mutableStateOf("") }
-    val (noteContent, changeContent) = remember { mutableStateOf("") }
+    val (title, changeTitle) = remember {
+        val title: String = if (note == null) {
+            ""
+        } else {
+            note.title!!
+        }
+        mutableStateOf(title)
+    }
+    val (noteContent, changeContent) = remember {
+        val noteContent: String = if (note == null) {
+            ""
+        } else {
+            note.noteText!!
+        }
+        mutableStateOf(noteContent)
+    }
+    var imagePath by remember {
+        mutableStateOf(note?.imagePath)
+    }
+    // 选中颜色
+    val selectedColor = remember { mutableStateOf(SelectedColor.Color1) }
     val dateTime by remember {
-        val time = SimpleDateFormat("yyyy MMMM dd HH:MM a,EEEE", Locale.getDefault()).format(Date())
+        val time = SimpleDateFormat("yyyy MMMM dd HH:MM, EEEE", Locale.getDefault()).format(Date())
         mutableStateOf(time)
     }
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
-    // 选中颜色
-    val selectedColor = remember { mutableStateOf(SelectedColor.Color1) }
-    var imagePath by remember { imagePathState }
 
     BottomSheetScaffold(
         sheetContent = {
             SheetContent(
                 scope,
                 scaffoldState,
-                context,
                 selectedColor
             )
         },
@@ -128,7 +147,7 @@ fun AddNote(
                         )
                     )
                     // 添加完一个note将imageUri设置为null,这样在点击添加按钮时就不会出现上一次的图片情况发生了
-                    imagePathState.value = null
+                    imagePath = null
                     navController.navigate(
                         route = Screen.MainScreen.name,
                         navOptions = NavOptions.Builder()
@@ -151,7 +170,6 @@ fun AddNote(
                     selectedColor = selectedColor.value,
                     onValueChange = changeTitle
                 )
-                // Fixme:时间信息显示
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(0.96f)
@@ -160,9 +178,8 @@ fun AddNote(
                     Text(text = dateTime, color = colorIcons)
                 }
                 Spacer(modifier = Modifier.height(10.dp))
-                // Fixme: 添加图片布局
                 imagePath?.let {
-                    SetImage(
+                    ChooseImage(
                         imagePath = it,
                         onIconClick = {
                             imagePath = null
@@ -182,9 +199,10 @@ fun AddNote(
 fun SheetContent(
     scope: CoroutineScope,
     scaffoldState: BottomSheetScaffoldState,
-    context: Context,
     selectedColor: MutableState<SelectedColor>
 ) {
+    val context = LocalContext.current
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -267,6 +285,23 @@ fun SheetContent(
                             context, Manifest.permission.READ_EXTERNAL_STORAGE
                         ) != PackageManager.PERMISSION_GRANTED
                     ) {
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                                context as MainActivity,
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                            )
+                        ) {
+                            Toast
+                                .makeText(
+                                    context,
+                                    "该权限已被用户选择了不再询问！",
+                                    Toast.LENGTH_SHORT
+                                )
+                                .show()
+                        } else {
+                            Toast
+                                .makeText(context, "权限未被授予！", Toast.LENGTH_SHORT)
+                                .show()
+                        }
                         (context as? MainActivity)?.getPermission()
                     } else { // 已经授权
                         (context as? MainActivity)?.selectImage()
@@ -417,6 +452,31 @@ fun AddNoteBackButton(onClick: () -> Unit) {
             contentDescription = null,
             modifier = Modifier.padding(start = 13.dp)
         )
+    }
+}
+
+@Composable
+fun ChooseImage(imagePath: String, onIconClick: () -> Unit) {
+    Box {
+        Image(
+            bitmap = BitmapFactory.decodeFile(imagePath).asImageBitmap(),
+            contentDescription = null,
+            modifier = Modifier.clip(RoundedCornerShape(15.dp))
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+        ) {
+            IconButton(
+                onClick = onIconClick,
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_delete),
+                    contentDescription = null,
+                    tint = Color.Red
+                )
+            }
+        }
     }
 }
 

@@ -1,15 +1,14 @@
 package com.sues.noteapp.viewModel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sues.noteapp.data.NoteRepository
 import com.sues.noteapp.data.local.Note
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
+import com.sues.noteapp.ui.theme.SelectedColor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -17,39 +16,51 @@ class NoteViewModel(
     private val noteRepository: NoteRepository
 ) : ViewModel() {
 
-    // 搜索界面Note展示
-    private val _noteList: MutableLiveData<List<Note>> = MutableLiveData()
-    val noteList: LiveData<List<Note>> = _noteList
+    /// region UiState
+    data class UiState(
+        val notes: List<Note> = emptyList(),
 
-    // 可以自定创建一个Scope，但是得自己管理生命周期的状态
-    private val customerScope =
-        CoroutineScope(CoroutineName("customCoroutine") + Job() + Dispatchers.IO)
+        val isUpdate: Boolean = false,
+        val note: Note? = null,
 
-    init {
-        viewModelScope.launch {
-            // 三秒后显示内容，不会阻塞UI
-            // delay(3000)
-            _noteList.postValue(getAllNotes())
-        }
-    }
+        val title: String? = null,
+        val date: String? = null,
+        val content: String? = null,
+        val imagePath: String? = null,
+        val selectedColor: SelectedColor = SelectedColor.Color1
+    )
+
+    var uiState by mutableStateOf(UiState())
+        private set
+
 
     fun insertNote(vararg notes: Note) {
-        // viewModelScope.launch(context = Dispatchers.IO) {
-        //     noteRepository.insertNotes(*notes)
-        //     _noteList.postValue(getAllNotes())
-        // }
-        // 与上面的等价
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 noteRepository.insertNotes(*notes)
-                _noteList.postValue(getAllNotes())
+                loadNotes()
             }
         }
     }
 
-    fun updateNote(note: Note) {
+    fun updateNote() {
         viewModelScope.launch {
-            noteRepository.updateNote(note = note)
+            withContext(Dispatchers.IO) {
+                uiState.note?.let {
+                    noteRepository.updateNote(
+                        it.copy(
+                            title = uiState.title,
+                            dateTime = uiState.date,
+                            noteText = uiState.content,
+                            imagePath = uiState.imagePath,
+                            selectedColor = uiState.selectedColor,
+                        )
+                    )
+                }
+
+                uiState = uiState.copy(isUpdate = true)
+                loadNotes()
+            }
         }
     }
 
@@ -66,9 +77,24 @@ class NoteViewModel(
     //     }.await()
     // }
 
-    suspend fun getAllNotes(): List<Note> {
-        return withContext(Dispatchers.IO) {
-            noteRepository.getAllNote()
+    fun loadNotes() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                uiState = uiState.copy(
+                    notes = noteRepository.getAllNote()
+                )
+            }
         }
     }
+
+    fun deleteNote(note: Note) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                noteRepository.deleteNote(note)
+                loadNotes()
+            }
+        }
+    }
+    /// endregion
+
 }

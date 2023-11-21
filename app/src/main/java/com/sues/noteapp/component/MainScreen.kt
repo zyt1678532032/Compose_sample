@@ -29,6 +29,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -71,13 +72,16 @@ fun MainScreen(
     navController: NavHostController,
     noteViewModel: NoteViewModel,
 ) {
+    LaunchedEffect(Unit) {
+        noteViewModel.loadNotes()
+    }
     val (searchText, searchTextChanged) = remember {
         mutableStateOf("")
     }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val notes by noteViewModel.noteList.observeAsState()
+    val state = noteViewModel.uiState
 
     Scaffold(
         topBar = {
@@ -115,7 +119,7 @@ fun MainScreen(
         SearchContent(
             padding = it,
             searchText = searchText,
-            notes = notes,
+            notes = state.notes,
             navController = navController,
             onValueChange = searchTextChanged,
         )

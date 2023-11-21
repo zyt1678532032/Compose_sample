@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     return NoteViewModel(
                         noteRepository = NoteRepositoryImpl(
-                            localDatasource = (application as NoteApplication).noteDatabase.noteDao()
+                            localDatasource = application.noteDatabase.noteDao()
                         )
                     ) as T
                 }
@@ -70,13 +70,13 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        getPermission()
         setContent {
             NoteAPPTheme {
                 NavGraph(
                     noteViewModel = noteViewModel,
                     scope = noteViewModel.viewModelScope,
                     context = this,
-                    imagePathState = imagePathState
                 )
             }
         }
@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
 
     fun getPermission() {
         // 申请权限
-        registerPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        registerPermission.launch(Manifest.permission.CALL_PHONE)
     }
 
     fun selectImage() {
