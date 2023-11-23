@@ -75,8 +75,6 @@ class MainActivity : ComponentActivity() {
             NoteAPPTheme {
                 NavGraph(
                     noteViewModel = noteViewModel,
-                    scope = noteViewModel.viewModelScope,
-                    context = this,
                 )
             }
         }

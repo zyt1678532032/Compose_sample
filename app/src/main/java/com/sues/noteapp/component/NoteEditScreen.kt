@@ -3,6 +3,7 @@ package com.sues.noteapp.component
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -74,19 +75,21 @@ fun AddNote(
     navController: NavHostController,
     noteViewModel: NoteViewModel,
 ) {
+    val state = noteViewModel.uiState
+
     val (title, changeTitle) = remember {
-        val title: String = if (note == null) {
+        val title: String = if (state.note == null) {
             ""
         } else {
-            note.title!!
+            state.note.title!!
         }
         mutableStateOf(title)
     }
     val (noteContent, changeContent) = remember {
-        val noteContent: String = if (note == null) {
+        val noteContent: String = if (state.note == null) {
             ""
         } else {
-            note.noteText!!
+            state.note.noteText!!
         }
         mutableStateOf(noteContent)
     }
@@ -94,7 +97,15 @@ fun AddNote(
         mutableStateOf(note?.imagePath)
     }
     // 选中颜色
-    val selectedColor = remember { mutableStateOf(SelectedColor.Color1) }
+    val selectedColor = remember {
+        val color: SelectedColor = if (state.note?.selectedColor == null) {
+            SelectedColor.Color1
+        } else {
+            state.note.selectedColor
+        }
+        mutableStateOf(color)
+    }
+
     val dateTime by remember {
         val time = SimpleDateFormat("yyyy MMMM dd HH:MM, EEEE", Locale.getDefault()).format(Date())
         mutableStateOf(time)
@@ -129,33 +140,57 @@ fun AddNote(
         },
         topBar = {
             AddNoteTopBar(
-                navController = navController,
-            ) { // 点击提交按钮
-                if (noteContent.isEmpty()) {
-                    scope.launch {
-                        scaffoldState.snackbarHostState
-                            .showSnackbar(message = "笔记内容不能为空!")
-                    }
-                } else {
-                    noteViewModel.insertNote(
-                        Note(
-                            title = title,
-                            noteText = noteContent,
-                            dateTime = dateTime,
-                            selectedColor = selectedColor.value,
-                            imagePath = imagePath
-                        )
-                    )
-                    // 添加完一个note将imageUri设置为null,这样在点击添加按钮时就不会出现上一次的图片情况发生了
-                    imagePath = null
+                onBack = {
+                    noteViewModel.setCurrentNote(null, isClickItem = false)
                     navController.navigate(
                         route = Screen.MainScreen.name,
                         navOptions = NavOptions.Builder()
                             .setPopUpTo(route = Screen.MainScreen.name, inclusive = true)
                             .build()
                     )
+                },
+                onDone = {
+                    if (noteContent.isEmpty()) {
+                        scope.launch {
+                            scaffoldState.snackbarHostState
+                                .showSnackbar(message = "笔记内容不能为空!")
+                        }
+                    } else {
+                        if (state.isClickItem) {
+                            state.note?.let {
+                                noteViewModel.updateNote(
+                                    it.copy(
+                                        title = title,
+                                        noteText = noteContent,
+                                        dateTime = dateTime,
+                                        selectedColor = selectedColor.value,
+                                        imagePath = imagePath
+                                    )
+                                )
+                            }
+                        } else {
+                            noteViewModel.insertNote(
+                                Note(
+                                    title = title,
+                                    noteText = noteContent,
+                                    dateTime = dateTime,
+                                    selectedColor = selectedColor.value,
+                                    imagePath = imagePath
+                                )
+                            )
+                        }
+                        // 添加完一个note将imageUri设置为null,这样在点击添加按钮时就不会出现上一次的图片情况发生了
+                        imagePath = null
+                        noteViewModel.setCurrentNote(null, isClickItem = false)
+                        navController.navigate(
+                            route = Screen.MainScreen.name,
+                            navOptions = NavOptions.Builder()
+                                .setPopUpTo(route = Screen.MainScreen.name, inclusive = true)
+                                .build()
+                        )
+                    }
                 }
-            }
+            )
         }) {
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -342,24 +377,17 @@ private fun SelectedColorChangeByOnClick(
 
 @Composable
 fun AddNoteTopBar(
-    navController: NavHostController,
-    onClick: () -> Unit
+    onBack: () -> Unit,
+    onDone: () -> Unit
 ) {
     TopAppBar {
         Row(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AddNoteBackButton {
-                navController.navigate(
-                    route = Screen.MainScreen.name,
-                    navOptions = NavOptions.Builder()
-                        .setPopUpTo(route = Screen.MainScreen.name, inclusive = true)
-                        .build()
-                )
-            }
+            AddNoteBackButton(onBack)
             Spacer(modifier = Modifier.fillMaxWidth(0.85f))
-            AddNoteDoneButton(onClick = onClick)
+            AddNoteDoneButton(onClick = onDone)
         }
     }
 }

@@ -20,8 +20,10 @@ class NoteViewModel(
     data class UiState(
         val notes: List<Note> = emptyList(),
 
-        val isUpdate: Boolean = false,
+
         val note: Note? = null,
+        val isClickAddBtn: Boolean = false,
+        val isClickItem: Boolean = false,
 
         val title: String? = null,
         val date: String? = null,
@@ -33,35 +35,24 @@ class NoteViewModel(
     var uiState by mutableStateOf(UiState())
         private set
 
-
     fun insertNote(vararg notes: Note) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 noteRepository.insertNotes(*notes)
-                loadNotes()
             }
         }
     }
 
-    fun updateNote() {
+    fun updateNote(note: Note) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                uiState.note?.let {
-                    noteRepository.updateNote(
-                        it.copy(
-                            title = uiState.title,
-                            dateTime = uiState.date,
-                            noteText = uiState.content,
-                            imagePath = uiState.imagePath,
-                            selectedColor = uiState.selectedColor,
-                        )
-                    )
-                }
-
-                uiState = uiState.copy(isUpdate = true)
-                loadNotes()
+                noteRepository.updateNote(note)
             }
         }
+    }
+
+    fun setCurrentNote(note: Note?, isClickItem: Boolean) {
+        uiState = uiState.copy(note = note, isClickItem = isClickItem)
     }
 
     suspend fun findNoteById(id: Int): Note? {
@@ -77,13 +68,11 @@ class NoteViewModel(
     //     }.await()
     // }
 
-    fun loadNotes() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                uiState = uiState.copy(
-                    notes = noteRepository.getAllNote()
-                )
-            }
+    suspend fun loadNotes() {
+        withContext(Dispatchers.IO) {
+            uiState = uiState.copy(
+                notes = noteRepository.getAllNote()
+            )
         }
     }
 

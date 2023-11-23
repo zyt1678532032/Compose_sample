@@ -1,6 +1,7 @@
 package com.sues.noteapp.component
 
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -122,6 +123,7 @@ fun MainScreen(
             notes = state.notes,
             navController = navController,
             onValueChange = searchTextChanged,
+            noteViewModel = noteViewModel
         )
     }
 }
@@ -174,7 +176,8 @@ fun SearchContent(
     searchText: String,
     notes: List<Note>?,
     navController: NavHostController,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    noteViewModel: NoteViewModel
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -207,6 +210,7 @@ fun SearchContent(
                 NoteItem(
                     note = note,
                     navController = navController,
+                    noteViewModel = noteViewModel
                 )
             }
         }
@@ -217,6 +221,7 @@ fun SearchContent(
 fun NoteItem(
     note: Note,
     navController: NavHostController,
+    noteViewModel: NoteViewModel,
 ) {
     // 颜色数据下沉到最后一个Composable函数中
     val backgroundColor = note.selectedColor.color
@@ -237,6 +242,7 @@ fun NoteItem(
                     },
                     onTap = {
                         if (!isDeleted) { // 非删除状态下才可以跳转
+                            noteViewModel.setCurrentNote(note = note, isClickItem = true)
                             navController.navigate(route = Screen.EditNoteScreen.name)
                         } else {
                             isDeleted = false

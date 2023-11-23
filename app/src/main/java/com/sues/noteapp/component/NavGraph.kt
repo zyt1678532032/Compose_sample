@@ -21,8 +21,6 @@ enum class Screen {
 @Composable
 fun NavGraph(
     noteViewModel: NoteViewModel,
-    scope: CoroutineScope,
-    context: Context,
 ) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screen.MainScreen.name) {
@@ -41,13 +39,10 @@ fun NavGraph(
         composable(
             route = Screen.EditNoteScreen.name,
         ) {
-
-            // EditNote(
-            //     note = note,
-            //     navController = navController,
-            //     noteViewModel = noteViewModel,
-            //     context = context
-            // )
+            AddNote(
+                navController = navController,
+                noteViewModel = noteViewModel,
+            )
         }
     }
 }
