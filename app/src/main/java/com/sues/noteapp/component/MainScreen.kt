@@ -1,7 +1,6 @@
 package com.sues.noteapp.component
 
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -31,8 +30,8 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,8 +42,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.painterResource
@@ -100,7 +97,7 @@ fun MainScreen(
             Row {
                 FloatingActionButton(
                     onClick = {
-                        noteViewModel.setCurrentNote(null)
+                        noteViewModel.setClickedNote(null)
                         navController.navigate(
                             route = Screen.AddNoteScreen.name,
                             navOptions = NavOptions.Builder()
@@ -175,9 +172,9 @@ fun SearchBottomAppBar(
 fun SearchContent(
     padding: PaddingValues,
     searchText: String,
+    onValueChange: (String) -> Unit,
     notes: List<Note>?,
     navController: NavHostController,
-    onValueChange: (String) -> Unit,
     noteViewModel: NoteViewModel
 ) {
     Column(
@@ -210,8 +207,14 @@ fun SearchContent(
             notes?.forEach { note ->
                 NoteItem(
                     note = note,
-                    navController = navController,
-                    noteViewModel = noteViewModel
+                    onTapNote = { isDeleted ->
+                        if (!isDeleted.value) { // 非删除状态下才可以跳转
+                            noteViewModel.setClickedNote(note)
+                            navController.navigate(route = Screen.EditNoteScreen.name)
+                        } else {
+                            isDeleted.value = false
+                        }
+                    }
                 )
             }
         }
@@ -221,13 +224,12 @@ fun SearchContent(
 @Composable
 fun NoteItem(
     note: Note,
-    navController: NavHostController,
-    noteViewModel: NoteViewModel,
+    onTapNote: (isDeleted: MutableState<Boolean>) -> Unit
 ) {
     // 颜色数据下沉到最后一个Composable函数中
     val backgroundColor = note.selectedColor.color
     // 控制右上角的删除框是否显示
-    var isDeleted by remember {
+    var isDeleted = remember {
         mutableStateOf(false)
     }
     Card(
@@ -237,18 +239,8 @@ fun NoteItem(
             .padding(horizontal = 4.dp, vertical = 4.dp)
             .pointerInput(Unit) {
                 detectTapGestures(
-                    onLongPress = {
-                        // 显示删除选框
-                        isDeleted = true
-                    },
-                    onTap = {
-                        if (!isDeleted) { // 非删除状态下才可以跳转
-                            noteViewModel.setCurrentNote(note = note)
-                            navController.navigate(route = Screen.EditNoteScreen.name)
-                        } else {
-                            isDeleted = false
-                        }
-                    }
+                    onLongPress = { isDeleted.value = true },
+                    onTap = { onTapNote(isDeleted) }
                 )
             }
     ) {
@@ -258,9 +250,9 @@ fun NoteItem(
                 contentColor = colorWhite,
                 shape = RoundedCornerShape(10.dp),
             ) {
-                if (isDeleted) {
+                if (isDeleted.value) {
                     IconButton(
-                        onClick = { isDeleted = false },
+                        onClick = { isDeleted.value = false },
                         modifier = Modifier
                             .align(alignment = Alignment.TopEnd)
                     ) {
@@ -272,7 +264,7 @@ fun NoteItem(
                                 .background(Color.White)
                                 .border(width = 2.dp, color = Color.White)
                                 .size(20.dp),
-                            tint = if (isDeleted) Color.Black else note.selectedColor.color
+                            tint = if (isDeleted.value) Color.Black else note.selectedColor.color
                         )
                     }
                 }

@@ -1,14 +1,11 @@
 package com.sues.noteapp.component
 
-import android.content.Context
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.sues.noteapp.viewModel.NoteViewModel
-import kotlinx.coroutines.CoroutineScope
 
 // 导航枚举类
 enum class Screen {
@@ -31,7 +28,7 @@ fun NavGraph(
             )
         }
         composable(route = Screen.AddNoteScreen.name) {
-            AddNote(
+            EditNoteScreen(
                 navController = navController,
                 noteViewModel = noteViewModel,
             )
@@ -39,7 +36,7 @@ fun NavGraph(
         composable(
             route = Screen.EditNoteScreen.name,
         ) {
-            AddNote(
+            EditNoteScreen(
                 navController = navController,
                 noteViewModel = noteViewModel,
             )

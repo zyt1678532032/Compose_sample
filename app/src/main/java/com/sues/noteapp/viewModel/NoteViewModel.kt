@@ -20,7 +20,7 @@ class NoteViewModel(
     data class UiState(
         val notes: List<Note> = emptyList(),
 
-        val note: Note? = null,
+        val clickedNote: Note? = null,
 
         val title: String? = null,
         val date: String? = null,
@@ -44,14 +44,14 @@ class NoteViewModel(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 noteRepository.updateNote(note)
-                // 更新notes
+                // ⚠️: 这里要注意更新notes，否则会出现点击note修改后，再次点击显示的还是上一次内容的问题
                 loadNotes()
             }
         }
     }
 
-    fun setCurrentNote(note: Note?) {
-        uiState = uiState.copy(note = note)
+    fun setClickedNote(clickedNote: Note?) {
+        uiState = uiState.copy(clickedNote = clickedNote)
     }
 
     suspend fun findNoteById(id: Int): Note? {

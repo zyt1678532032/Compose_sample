@@ -3,7 +3,6 @@ package com.sues.noteapp.component
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -70,7 +69,7 @@ import java.util.Locale
 
 @ExperimentalMaterialApi
 @Composable
-fun AddNote(
+fun EditNoteScreen(
     note: Note? = null,
     navController: NavHostController,
     noteViewModel: NoteViewModel,
@@ -78,18 +77,18 @@ fun AddNote(
     val state = noteViewModel.uiState
 
     val (title, changeTitle) = remember {
-        val title: String = if (state.note == null) {
+        val title = if (state.clickedNote == null) {
             ""
         } else {
-            state.note.title!!
+            state.clickedNote.title ?: ""
         }
         mutableStateOf(title)
     }
     val (noteContent, changeContent) = remember {
-        val noteContent: String = if (state.note == null) {
+        val noteContent = if (state.clickedNote == null) {
             ""
         } else {
-            state.note.noteText!!
+            state.clickedNote.noteText ?: ""
         }
         mutableStateOf(noteContent)
     }
@@ -98,10 +97,10 @@ fun AddNote(
     }
     // 选中颜色
     val selectedColor = remember {
-        val color: SelectedColor = if (state.note?.selectedColor == null) {
+        val color = if (state.clickedNote == null) {
             SelectedColor.Color1
         } else {
-            state.note.selectedColor
+            state.clickedNote.selectedColor
         }
         mutableStateOf(color)
     }
@@ -141,7 +140,6 @@ fun AddNote(
         topBar = {
             AddNoteTopBar(
                 onBack = {
-                    noteViewModel.setCurrentNote(null)
                     navController.navigate(
                         route = Screen.MainScreen.name,
                         navOptions = NavOptions.Builder()
@@ -156,9 +154,9 @@ fun AddNote(
                                 .showSnackbar(message = "笔记内容不能为空!")
                         }
                     } else {
-                        if (state.note != null) {
+                        if (state.clickedNote != null) {
                                 noteViewModel.updateNote(
-                                    state.note.copy(
+                                    state.clickedNote.copy(
                                         title = title,
                                         noteText = noteContent,
                                         dateTime = dateTime,
