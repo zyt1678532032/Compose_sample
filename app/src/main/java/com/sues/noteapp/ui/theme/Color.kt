@@ -17,19 +17,19 @@ val colorDefaultNoteColor = Color(0xFF333333)
 val colorNoteSubtitleText = Color(0xFFFAFAFA)
 val colorMiscellaneousBackground = Color(0xFF1F1F1F)
 
+val colorNoteColor1 = Color(0xFF00BCD4)
 val colorNoteColor2 = Color(0xFFFDBE38)
 val colorNoteColor3 = Color(0xFFFF4842)
 val colorNoteColor4 = Color(0xFF3A52FC)
-val colorNoteColor5 = Color(0xFF000000)
+val colorNoteColor5 = Color(0xFF8BC34A)
 
 val colorDelete = Color(0xFFFF4842)
 val colorSearchBackground = Color(0xFF333333)
 
-val test = Color(0xFF018786)
 
 // 底部导航兰选择的颜色
 enum class SelectedColor(val color: Color) {
-    Color1(colorPrimaryDark),
+    Color1(colorNoteColor1),
     Color2(colorNoteColor2),
     Color3(colorNoteColor3),
     Color4(colorNoteColor4),

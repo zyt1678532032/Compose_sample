@@ -77,19 +77,11 @@ fun EditNoteScreen(
     val state = noteViewModel.uiState
 
     val (title, changeTitle) = remember {
-        val title = if (state.clickedNote == null) {
-            ""
-        } else {
-            state.clickedNote.title ?: ""
-        }
+        val title = state.clickedNote?.title ?: ""
         mutableStateOf(title)
     }
     val (noteContent, changeContent) = remember {
-        val noteContent = if (state.clickedNote == null) {
-            ""
-        } else {
-            state.clickedNote.noteText ?: ""
-        }
+        val noteContent = state.clickedNote?.noteText ?: ""
         mutableStateOf(noteContent)
     }
     var imagePath by remember {
@@ -97,11 +89,7 @@ fun EditNoteScreen(
     }
     // 选中颜色
     val selectedColor = remember {
-        val color = if (state.clickedNote == null) {
-            SelectedColor.Color1
-        } else {
-            state.clickedNote.selectedColor
-        }
+        val color = state.clickedNote?.selectedColor ?: SelectedColor.Color1
         mutableStateOf(color)
     }
 
@@ -155,15 +143,15 @@ fun EditNoteScreen(
                         }
                     } else {
                         if (state.clickedNote != null) {
-                                noteViewModel.updateNote(
-                                    state.clickedNote.copy(
-                                        title = title,
-                                        noteText = noteContent,
-                                        dateTime = dateTime,
-                                        selectedColor = selectedColor.value,
-                                        imagePath = imagePath
-                                    )
+                            noteViewModel.updateNote(
+                                state.clickedNote.copy(
+                                    title = title,
+                                    noteText = noteContent,
+                                    dateTime = dateTime,
+                                    selectedColor = selectedColor.value,
+                                    imagePath = imagePath
                                 )
+                            )
                         } else {
                             noteViewModel.insertNote(
                                 Note(
@@ -255,46 +243,26 @@ fun SheetContent(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            SelectedColorChangeByOnClick(
-                selectedColor = selectedColor.value,
-                currentColor = SelectedColor.Color1,
-                onClick = {
-                    if (selectedColor.value != SelectedColor.Color1) {
-                        selectedColor.value = SelectedColor.Color1
-                    }
-                })
-            SelectedColorChangeByOnClick(
-                selectedColor = selectedColor.value,
-                currentColor = SelectedColor.Color2,
-                onClick = {
-                    if (selectedColor.value != SelectedColor.Color2) {
-                        selectedColor.value = SelectedColor.Color2
-                    }
-                })
-            SelectedColorChangeByOnClick(
-                selectedColor = selectedColor.value,
-                currentColor = SelectedColor.Color3,
-                onClick = {
-                    if (selectedColor.value != SelectedColor.Color3) {
-                        selectedColor.value = SelectedColor.Color3
-                    }
-                })
-            SelectedColorChangeByOnClick(
-                selectedColor = selectedColor.value,
-                currentColor = SelectedColor.Color4,
-                onClick = {
-                    if (selectedColor.value != SelectedColor.Color4) {
-                        selectedColor.value = SelectedColor.Color4
-                    }
-                })
-            SelectedColorChangeByOnClick(
-                selectedColor = selectedColor.value,
-                currentColor = SelectedColor.Color5,
-                onClick = {
-                    if (selectedColor.value != SelectedColor.Color5) {
-                        selectedColor.value = SelectedColor.Color5
-                    }
-                })
+            SelectedColorCard(
+                selectedColor = selectedColor,
+                backgroundColor = SelectedColor.Color1,
+            )
+            SelectedColorCard(
+                selectedColor = selectedColor,
+                backgroundColor = SelectedColor.Color2,
+            )
+            SelectedColorCard(
+                selectedColor = selectedColor,
+                backgroundColor = SelectedColor.Color3,
+            )
+            SelectedColorCard(
+                selectedColor = selectedColor,
+                backgroundColor = SelectedColor.Color4,
+            )
+            SelectedColorCard(
+                selectedColor = selectedColor,
+                backgroundColor = SelectedColor.Color5,
+            )
             Text(
                 text = "选择颜色",
                 fontWeight = FontWeight.Bold,
@@ -350,25 +318,32 @@ fun SheetContent(
 }
 
 @Composable
-private fun SelectedColorChangeByOnClick(
-    selectedColor: SelectedColor,
-    currentColor: SelectedColor,
-    onClick: () -> Unit
+private fun SelectedColorCard(
+    selectedColor: MutableState<SelectedColor>,
+    backgroundColor: SelectedColor,
 ) {
-    IconButton(onClick = onClick) {
+    IconButton(onClick = {
+        showRightIcon(selectedColor, backgroundColor)
+    }) {
         Icon(
             painter = painterResource(id = R.drawable.ic_done),
             contentDescription = null,
             modifier = Modifier
                 .clip(RoundedCornerShape(35.dp))
-                .background(currentColor.color)
+                .background(backgroundColor.color)
                 .size(40.dp)
                 .padding(5.dp),
-            tint = if (selectedColor == currentColor) colorWhite else currentColor.color
+            tint = if (selectedColor.value == backgroundColor) colorWhite else backgroundColor.color
         )
     }
 }
 
+private fun showRightIcon(
+    selectedColor: MutableState<SelectedColor>,
+    backgroundColor: SelectedColor
+) {
+    selectedColor.value = backgroundColor
+}
 
 @Composable
 fun AddNoteTopBar(
