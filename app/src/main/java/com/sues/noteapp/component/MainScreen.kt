@@ -100,6 +100,7 @@ fun MainScreen(
             Row {
                 FloatingActionButton(
                     onClick = {
+                        noteViewModel.setCurrentNote(null)
                         navController.navigate(
                             route = Screen.AddNoteScreen.name,
                             navOptions = NavOptions.Builder()
@@ -242,7 +243,7 @@ fun NoteItem(
                     },
                     onTap = {
                         if (!isDeleted) { // 非删除状态下才可以跳转
-                            noteViewModel.setCurrentNote(note = note, isClickItem = true)
+                            noteViewModel.setCurrentNote(note = note)
                             navController.navigate(route = Screen.EditNoteScreen.name)
                         } else {
                             isDeleted = false

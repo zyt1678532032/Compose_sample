@@ -20,10 +20,7 @@ class NoteViewModel(
     data class UiState(
         val notes: List<Note> = emptyList(),
 
-
         val note: Note? = null,
-        val isClickAddBtn: Boolean = false,
-        val isClickItem: Boolean = false,
 
         val title: String? = null,
         val date: String? = null,
@@ -53,8 +50,8 @@ class NoteViewModel(
         }
     }
 
-    fun setCurrentNote(note: Note?, isClickItem: Boolean) {
-        uiState = uiState.copy(note = note, isClickItem = isClickItem)
+    fun setCurrentNote(note: Note?) {
+        uiState = uiState.copy(note = note)
     }
 
     suspend fun findNoteById(id: Int): Note? {

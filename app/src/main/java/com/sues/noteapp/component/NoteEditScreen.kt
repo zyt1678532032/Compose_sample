@@ -141,7 +141,7 @@ fun AddNote(
         topBar = {
             AddNoteTopBar(
                 onBack = {
-                    noteViewModel.setCurrentNote(null, isClickItem = false)
+                    noteViewModel.setCurrentNote(null)
                     navController.navigate(
                         route = Screen.MainScreen.name,
                         navOptions = NavOptions.Builder()
@@ -156,10 +156,9 @@ fun AddNote(
                                 .showSnackbar(message = "笔记内容不能为空!")
                         }
                     } else {
-                        if (state.isClickItem) {
-                            state.note?.let {
+                        if (state.note != null) {
                                 noteViewModel.updateNote(
-                                    it.copy(
+                                    state.note.copy(
                                         title = title,
                                         noteText = noteContent,
                                         dateTime = dateTime,
@@ -167,7 +166,6 @@ fun AddNote(
                                         imagePath = imagePath
                                     )
                                 )
-                            }
                         } else {
                             noteViewModel.insertNote(
                                 Note(
@@ -181,7 +179,6 @@ fun AddNote(
                         }
                         // 添加完一个note将imageUri设置为null,这样在点击添加按钮时就不会出现上一次的图片情况发生了
                         imagePath = null
-                        noteViewModel.setCurrentNote(null, isClickItem = false)
                         navController.navigate(
                             route = Screen.MainScreen.name,
                             navOptions = NavOptions.Builder()
