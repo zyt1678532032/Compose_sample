@@ -47,6 +47,8 @@ class NoteViewModel(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 noteRepository.updateNote(note)
+                // 更新notes
+                loadNotes()
             }
         }
     }
