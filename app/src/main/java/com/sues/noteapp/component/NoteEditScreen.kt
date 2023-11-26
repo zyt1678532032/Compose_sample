@@ -1,7 +1,9 @@
 package com.sues.noteapp.component
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -53,12 +55,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
-import com.sues.noteapp.ImageUtils
-import com.sues.noteapp.PermissionUtils
 import com.sues.noteapp.R
 import com.sues.noteapp.data.local.Note
+import com.sues.noteapp.getActivity
 import com.sues.noteapp.ui.theme.SelectedColor
 import com.sues.noteapp.ui.theme.colorIcons
 import com.sues.noteapp.ui.theme.colorMiscellaneousBackground
@@ -77,6 +80,7 @@ fun EditNoteScreen(
     noteViewModel: NoteViewModel,
 ) {
     val state = noteViewModel.uiState
+    val context = LocalContext.current
 
     Log.i("MainActivity", "当前的note: ${state.clickedNote}")
     val (title, changeTitle) = remember {
@@ -103,6 +107,19 @@ fun EditNoteScreen(
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
 
+    val permissionlauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+            if (it) {
+                scope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar("已授权")
+                }
+            } else {
+                scope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar("未授权")
+                }
+            }
+        }
+
     val pickImage = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = noteViewModel::onPhotoPickerSelect
@@ -115,7 +132,30 @@ fun EditNoteScreen(
                 scaffoldState,
                 selectedColor
             ) {
-                pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                when {
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.READ_MEDIA_IMAGES
+                    ) == PackageManager.PERMISSION_DENIED -> {
+                        // 未授权
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            permissionlauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
+                        } else {
+                            permissionlauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        }
+                    }
+
+                    ActivityCompat.shouldShowRequestPermissionRationale(
+                        context.getActivity(),
+                        Manifest.permission.READ_MEDIA_IMAGES
+                    ) -> {
+                        scope.launch {
+                            scaffoldState.snackbarHostState.showSnackbar("shouldShowRequestPermissionRationale")
+                        }
+                    }
+
+                    else -> pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                }
             }
         },
         sheetPeekHeight = 60.dp,
@@ -227,7 +267,7 @@ fun SheetContent(
     scope: CoroutineScope,
     scaffoldState: BottomSheetScaffoldState,
     selectedColor: MutableState<SelectedColor>,
-    onImageAdd: () -> Unit
+    onAddImageClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -290,7 +330,7 @@ fun SheetContent(
                     }
                 },
         ) {
-            TextButton(onClick = onImageAdd) {
+            TextButton(onClick = onAddImageClick) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_image),
                     contentDescription = null,
