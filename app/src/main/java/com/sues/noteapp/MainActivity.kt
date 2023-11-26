@@ -4,8 +4,10 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,7 +20,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import com.sues.noteapp.component.NavGraph
 import com.sues.noteapp.data.NoteRepositoryImpl
 import com.sues.noteapp.ui.theme.NoteAPPTheme
@@ -33,18 +34,20 @@ class MainActivity : ComponentActivity() {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     return NoteViewModel(
                         noteRepository = NoteRepositoryImpl(
-                            localDatasource = application.noteDatabase.noteDao()
+                            localDatasource = application.noteDatabase.noteDao(),
+                            contentResolver = contentResolver
                         )
                     ) as T
                 }
             }
         }
     )
-    private val imagePathState: MutableState<String?> = mutableStateOf(null)
 
-    private val activityResultLauncher: ActivityResultLauncher<Void> =
-        registerForActivityResult(object : ActivityResultContract<Void, Uri?>() {
-            override fun createIntent(context: Context, input: Void): Intent {
+    private lateinit var resultCallback: (path: String?) -> Unit
+
+    private val imagePickerLauncher: ActivityResultLauncher<Void?> =
+        registerForActivityResult(object : ActivityResultContract<Void?, Uri?>() {
+            override fun createIntent(context: Context, input: Void?): Intent {
                 return Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             }
 
@@ -53,15 +56,18 @@ class MainActivity : ComponentActivity() {
             }
         }) {
             if (it != null) {
-                imagePathState.value = getPathFromUri(it, contentResolver)
+                val imagePath = ImageUtils.getPathFromUri(it, contentResolver)
+                resultCallback(imagePath)
+                Log.i("MainActivity", "imagePath: $imagePath")
             }
         }
 
-    private val registerPermission: ActivityResultLauncher<String> =
+    private val permissionLauncher: ActivityResultLauncher<String> =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { permissionResult ->
             if (permissionResult) {
                 // 授权通过
-                selectImage()
+                Toast.makeText(this@MainActivity, "授权通过", Toast.LENGTH_SHORT).show()
+
             } else {
                 Toast.makeText(this@MainActivity, "申请权限失败", Toast.LENGTH_SHORT).show()
             }
@@ -70,7 +76,6 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getPermission()
         setContent {
             NoteAPPTheme {
                 NavGraph(
@@ -82,11 +87,16 @@ class MainActivity : ComponentActivity() {
 
     fun getPermission() {
         // 申请权限
-        registerPermission.launch(Manifest.permission.CALL_PHONE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
+        } else {
+            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
     }
 
-    fun selectImage() {
-        activityResultLauncher.launch(null)
+    fun selectImage(resultCallback: (path: String?) -> Unit) {
+        this.resultCallback = resultCallback
+        imagePickerLauncher.launch(null)
     }
 
 }

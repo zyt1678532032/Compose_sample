@@ -1,5 +1,6 @@
 package com.sues.noteapp.data
 
+import android.content.ContentResolver
 import com.sues.noteapp.data.local.Note
 import com.sues.noteapp.data.local.NoteDao
 import kotlinx.coroutines.CoroutineDispatcher
@@ -7,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 
 class NoteRepositoryImpl(
     private val localDatasource: NoteDao,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    override val contentResolver: ContentResolver
 ) : NoteRepository {
     override suspend fun getAllNote(): List<Note> {
         return localDatasource.getAll()

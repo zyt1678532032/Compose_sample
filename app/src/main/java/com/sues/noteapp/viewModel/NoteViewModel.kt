@@ -1,10 +1,12 @@
 package com.sues.noteapp.viewModel
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sues.noteapp.ImageUtils
 import com.sues.noteapp.data.NoteRepository
 import com.sues.noteapp.data.local.Note
 import com.sues.noteapp.ui.theme.SelectedColor
@@ -44,6 +46,9 @@ class NoteViewModel(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 noteRepository.updateNote(note)
+                uiState = uiState.copy(
+                    clickedNote = note
+                )
                 // ⚠️: 这里要注意更新notes，否则会出现点击note修改后，再次点击显示的还是上一次内容的问题
                 loadNotes()
             }
@@ -59,13 +64,6 @@ class NoteViewModel(
             noteRepository.findNoteById(id = id)
         }
     }
-
-    // 和上面的写法类似，建议使用 withContext
-    // suspend fun findNoteByTitle2(title: String): Note? {
-    //     return viewModelScope.async {
-    //         noteRepository.findByTitle(title = title)
-    //     }.await()
-    // }
 
     suspend fun loadNotes() {
         withContext(Dispatchers.IO) {
@@ -84,5 +82,16 @@ class NoteViewModel(
         }
     }
     /// endregion
+
+    fun onPhotoPickerSelect(uri: Uri?) {
+        viewModelScope.launch {
+            val imagePath = ImageUtils.getPathFromUri(uri, noteRepository.contentResolver)
+            uiState.clickedNote?.copy(
+                imagePath = imagePath
+            )?.let { note ->
+                updateNote(note = note)
+            }
+        }
+    }
 
 }

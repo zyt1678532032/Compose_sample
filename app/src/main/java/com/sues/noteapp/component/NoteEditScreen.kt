@@ -1,9 +1,11 @@
 package com.sues.noteapp.component
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.widget.Toast
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetScaffoldState
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -30,6 +33,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Snackbar
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.rememberBottomSheetScaffoldState
@@ -49,11 +53,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
-import com.sues.noteapp.MainActivity
+import com.sues.noteapp.ImageUtils
+import com.sues.noteapp.PermissionUtils
 import com.sues.noteapp.R
 import com.sues.noteapp.data.local.Note
 import com.sues.noteapp.ui.theme.SelectedColor
@@ -70,12 +73,12 @@ import java.util.Locale
 @ExperimentalMaterialApi
 @Composable
 fun EditNoteScreen(
-    note: Note? = null,
     navController: NavHostController,
     noteViewModel: NoteViewModel,
 ) {
     val state = noteViewModel.uiState
 
+    Log.i("MainActivity", "当前的note: ${state.clickedNote}")
     val (title, changeTitle) = remember {
         val title = state.clickedNote?.title ?: ""
         mutableStateOf(title)
@@ -85,7 +88,7 @@ fun EditNoteScreen(
         mutableStateOf(noteContent)
     }
     var imagePath by remember {
-        mutableStateOf(note?.imagePath)
+        mutableStateOf(state.clickedNote?.imagePath)
     }
     // 选中颜色
     val selectedColor = remember {
@@ -100,13 +103,20 @@ fun EditNoteScreen(
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
 
+    val pickImage = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = noteViewModel::onPhotoPickerSelect
+    )
+
     BottomSheetScaffold(
         sheetContent = {
             SheetContent(
                 scope,
                 scaffoldState,
                 selectedColor
-            )
+            ) {
+                pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
         },
         sheetPeekHeight = 60.dp,
         sheetBackgroundColor = colorMiscellaneousBackground,
@@ -164,7 +174,6 @@ fun EditNoteScreen(
                             )
                         }
                         // 添加完一个note将imageUri设置为null,这样在点击添加按钮时就不会出现上一次的图片情况发生了
-                        imagePath = null
                         navController.navigate(
                             route = Screen.MainScreen.name,
                             navOptions = NavOptions.Builder()
@@ -197,7 +206,7 @@ fun EditNoteScreen(
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 imagePath?.let {
-                    ChooseImage(
+                    ImageCard(
                         imagePath = it,
                         onIconClick = {
                             imagePath = null
@@ -217,10 +226,9 @@ fun EditNoteScreen(
 fun SheetContent(
     scope: CoroutineScope,
     scaffoldState: BottomSheetScaffoldState,
-    selectedColor: MutableState<SelectedColor>
+    selectedColor: MutableState<SelectedColor>,
+    onImageAdd: () -> Unit
 ) {
-    val context = LocalContext.current
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -270,7 +278,8 @@ fun SheetContent(
             )
         }
         // 添加图片
-        Row(horizontalArrangement = Arrangement.Center,
+        Row(
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
@@ -279,40 +288,17 @@ fun SheetContent(
                     scope.launch {
                         scaffoldState.bottomSheetState.collapse()
                     }
-                    if (ContextCompat.checkSelfPermission(
-                            context, Manifest.permission.READ_EXTERNAL_STORAGE
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(
-                                context as MainActivity,
-                                Manifest.permission.READ_EXTERNAL_STORAGE
-                            )
-                        ) {
-                            Toast
-                                .makeText(
-                                    context,
-                                    "该权限已被用户选择了不再询问！",
-                                    Toast.LENGTH_SHORT
-                                )
-                                .show()
-                        } else {
-                            Toast
-                                .makeText(context, "权限未被授予！", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                        (context as? MainActivity)?.getPermission()
-                    } else { // 已经授权
-                        (context as? MainActivity)?.selectImage()
-                    }
-                }) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_image),
-                contentDescription = null,
-                tint = colorWhite
-            )
-            Text(
-                text = "添加图片", color = colorWhite
-            )
+                },
+        ) {
+            TextButton(onClick = onImageAdd) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_image),
+                    contentDescription = null,
+                    tint = colorWhite
+                )
+                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                Text(text = "添加图片", color = colorWhite)
+            }
         }
     }
 }
@@ -323,7 +309,7 @@ private fun SelectedColorCard(
     backgroundColor: SelectedColor,
 ) {
     IconButton(onClick = {
-        showRightIcon(selectedColor, backgroundColor)
+        selectedColor.value = backgroundColor
     }) {
         Icon(
             painter = painterResource(id = R.drawable.ic_done),
@@ -333,16 +319,20 @@ private fun SelectedColorCard(
                 .background(backgroundColor.color)
                 .size(40.dp)
                 .padding(5.dp),
-            tint = if (selectedColor.value == backgroundColor) colorWhite else backgroundColor.color
+            tint = isShowIconDone(selectedColor, backgroundColor)
         )
     }
 }
 
-private fun showRightIcon(
+private fun isShowIconDone(
     selectedColor: MutableState<SelectedColor>,
     backgroundColor: SelectedColor
-) {
-    selectedColor.value = backgroundColor
+): Color {
+    return if (selectedColor.value == backgroundColor) {
+        colorWhite
+    } else {
+        backgroundColor.color
+    }
 }
 
 @Composable
@@ -355,9 +345,25 @@ fun AddNoteTopBar(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AddNoteBackButton(onBack)
+            IconButton(onClick = onBack) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_back),
+                    contentDescription = null,
+                    modifier = Modifier.padding(start = 13.dp)
+                )
+            }
             Spacer(modifier = Modifier.fillMaxWidth(0.85f))
-            AddNoteDoneButton(onClick = onDone)
+            IconButton(onClick = onDone) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_done),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(25.dp)
+                        .height(24.dp)
+                        .border(width = 2.dp, color = colorIcons, shape = RoundedCornerShape(30.dp))
+                        .padding(5.dp)
+                )
+            }
         }
     }
 }
@@ -425,36 +431,7 @@ fun AddNoteContent(noteContent: String?, onValueChange: (String) -> Unit) {
 }
 
 @Composable
-fun AddNoteDoneButton(onClick: () -> Unit) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_done),
-            contentDescription = null,
-            modifier = Modifier
-                .width(25.dp)
-                .height(24.dp)
-                .border(width = 2.dp, color = colorIcons, shape = RoundedCornerShape(30.dp))
-                .padding(5.dp)
-        )
-    }
-}
-
-@Composable
-fun AddNoteBackButton(onClick: () -> Unit) {
-    IconButton(onClick = onClick) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_back),
-            contentDescription = null,
-            modifier = Modifier.padding(start = 13.dp)
-        )
-    }
-}
-
-@Composable
-fun ChooseImage(imagePath: String, onIconClick: () -> Unit) {
+fun ImageCard(imagePath: String, onIconClick: () -> Unit) {
     Box {
         Image(
             bitmap = BitmapFactory.decodeFile(imagePath).asImageBitmap(),
