@@ -1,11 +1,9 @@
 package com.sues.noteapp.data
 
-import android.content.ContentResolver
 import com.sues.noteapp.data.local.Note
 
 
 interface NoteRepository {
-    val contentResolver: ContentResolver
 
     suspend fun getAllNote(): List<Note>
 

@@ -59,6 +59,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
+import com.sues.noteapp.ImageUtils
 import com.sues.noteapp.R
 import com.sues.noteapp.data.local.Note
 import com.sues.noteapp.getActivity
@@ -122,8 +123,9 @@ fun EditNoteScreen(
 
     val pickImage = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = noteViewModel::onPhotoPickerSelect
-    )
+    ) {
+        imagePath = ImageUtils.getPathFromUri(it, context.contentResolver)
+    }
 
     BottomSheetScaffold(
         sheetContent = {
@@ -245,9 +247,9 @@ fun EditNoteScreen(
                     Text(text = dateTime, color = colorIcons)
                 }
                 Spacer(modifier = Modifier.height(10.dp))
-                imagePath?.let {
+                if (imagePath != null) {
                     ImageCard(
-                        imagePath = it,
+                        imagePath = imagePath!!,
                         onIconClick = {
                             imagePath = null
                         },

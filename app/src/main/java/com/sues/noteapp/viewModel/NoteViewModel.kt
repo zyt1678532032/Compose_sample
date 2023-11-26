@@ -1,12 +1,10 @@
 package com.sues.noteapp.viewModel
 
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sues.noteapp.ImageUtils
 import com.sues.noteapp.data.NoteRepository
 import com.sues.noteapp.data.local.Note
 import com.sues.noteapp.ui.theme.SelectedColor
@@ -82,16 +80,5 @@ class NoteViewModel(
         }
     }
     /// endregion
-
-    fun onPhotoPickerSelect(uri: Uri?) {
-        viewModelScope.launch {
-            val imagePath = ImageUtils.getPathFromUri(uri, noteRepository.contentResolver)
-            uiState.clickedNote?.copy(
-                imagePath = imagePath
-            )?.let { note ->
-                updateNote(note = note)
-            }
-        }
-    }
 
 }
