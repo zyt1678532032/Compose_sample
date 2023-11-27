@@ -1,13 +1,17 @@
 package com.sues.noteapp.component
 
 import android.Manifest
+import android.content.Context.WINDOW_SERVICE
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.os.Build
+import android.util.DisplayMetrics
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -73,6 +77,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
 
 @ExperimentalMaterialApi
 @Composable
@@ -228,7 +233,6 @@ fun EditNoteScreen(
         }) {
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 70.dp)
@@ -247,17 +251,28 @@ fun EditNoteScreen(
                     Text(text = dateTime, color = colorIcons)
                 }
                 Spacer(modifier = Modifier.height(10.dp))
-                if (imagePath != null) {
-                    ImageCard(
-                        imagePath = imagePath!!,
-                        onIconClick = {
-                            imagePath = null
-                        },
-                    )
-                }
-                Spacer(modifier = Modifier.height(10.dp))
                 // 笔记内容体
                 AddNoteContent(noteContent = noteContent, onValueChange = changeContent)
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (imagePath != null) {
+                        ImageCard(
+                            imagePath = imagePath!!,
+                            onIconClick = {
+                                imagePath = null
+                            },
+                        )
+                    }
+                    if (imagePath != null) {
+                        ImageCard(
+                            imagePath = imagePath!!,
+                            onIconClick = {
+                                imagePath = null
+                            },
+                        )
+                    }
+                }
             }
         }
     }
@@ -474,11 +489,30 @@ fun AddNoteContent(noteContent: String?, onValueChange: (String) -> Unit) {
 
 @Composable
 fun ImageCard(imagePath: String, onIconClick: () -> Unit) {
+    val bitmap = BitmapFactory.decodeFile(imagePath)
+    val deviceWidth: Int
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val display = LocalContext.current.display
+        val metrics = DisplayMetrics()
+        display?.getMetrics(metrics)
+        deviceWidth = metrics.widthPixels
+    } else {
+        val windowManager = LocalContext.current.getSystemService(WINDOW_SERVICE) as WindowManager
+        val metrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(metrics)
+        deviceWidth = metrics.widthPixels
+    }
+    val imageWidth = (deviceWidth - 110.dp.value.toInt()) / 2
+    val imageHeight = 400
+
+    val imageBitmap = ImageUtils.centerCrop(bitmap, imageWidth, imageHeight).asImageBitmap()
     Box {
         Image(
-            bitmap = BitmapFactory.decodeFile(imagePath).asImageBitmap(),
+            bitmap = imageBitmap,
             contentDescription = null,
-            modifier = Modifier.clip(RoundedCornerShape(15.dp))
+            modifier = Modifier
+                .padding(horizontal = 10.dp, vertical = 5.dp)
+                .clip(RoundedCornerShape(10.dp))
         )
         Box(
             modifier = Modifier

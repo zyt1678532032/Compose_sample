@@ -111,7 +111,8 @@ fun MainScreen(
                     )
                 }
             }
-        }
+        },
+        isFloatingActionButtonDocked = true
     ) {
         SearchContent(
             padding = it,
@@ -199,7 +200,7 @@ fun SearchContent(
         StaggeredVerticalGrid(
             maxColumnWidth = 200.dp,
             modifier = Modifier
-                .padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 70.dp)
+                .padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 0.dp)
                 .verticalScroll(ScrollState(0))
         ) {
             notes?.forEach { note ->

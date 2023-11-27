@@ -35,21 +35,21 @@ class NoteViewModel(
     var uiState by mutableStateOf(UiState())
         private set
 
+    // /data/user/0/com.sues.noteapp/cache/photos
     private val _photoFolder = File(noteRepository.context.cacheDir, "photos").also { it.mkdir() }
 
-    private fun genPhotoFile(): File {
-        return File(_photoFolder, "${System.currentTimeMillis()}.jpg")
-    }
 
     fun savePhoto(photoUri: Uri): String {
         val photo = genPhotoFile()
         noteRepository.context.contentResolver.openInputStream(photoUri)?.use { input ->
-            photo.outputStream().use {  output ->
+            photo.outputStream().use { output ->
                 input.copyTo(output)
             }
         }
         return photo.path
     }
+
+    private fun genPhotoFile() = File(_photoFolder, "${System.currentTimeMillis()}.jpg")
 
     fun insertNote(vararg notes: Note) {
         viewModelScope.launch {
