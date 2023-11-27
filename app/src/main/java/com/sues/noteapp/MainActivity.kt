@@ -22,6 +22,7 @@ class MainActivity : ComponentActivity() {
                     return NoteViewModel(
                         noteRepository = NoteRepositoryImpl(
                             localDatasource = application.noteDatabase.noteDao(),
+                            context = applicationContext
                         )
                     ) as T
                 }

@@ -1,9 +1,12 @@
 package com.sues.noteapp.data
 
+import android.content.Context
 import com.sues.noteapp.data.local.Note
 
 
 interface NoteRepository {
+
+    val context: Context
 
     suspend fun getAllNote(): List<Note>
 

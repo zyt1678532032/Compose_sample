@@ -1,5 +1,7 @@
 package com.sues.noteapp.viewModel
 
+import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,6 +13,7 @@ import com.sues.noteapp.ui.theme.SelectedColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class NoteViewModel(
     private val noteRepository: NoteRepository
@@ -31,6 +34,22 @@ class NoteViewModel(
 
     var uiState by mutableStateOf(UiState())
         private set
+
+    private val _photoFolder = File(noteRepository.context.cacheDir, "photos").also { it.mkdir() }
+
+    private fun genPhotoFile(): File {
+        return File(_photoFolder, "${System.currentTimeMillis()}.jpg")
+    }
+
+    fun savePhoto(photoUri: Uri): String {
+        val photo = genPhotoFile()
+        noteRepository.context.contentResolver.openInputStream(photoUri)?.use { input ->
+            photo.outputStream().use {  output ->
+                input.copyTo(output)
+            }
+        }
+        return photo.path
+    }
 
     fun insertNote(vararg notes: Note) {
         viewModelScope.launch {

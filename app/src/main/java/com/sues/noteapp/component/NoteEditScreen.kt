@@ -108,24 +108,24 @@ fun EditNoteScreen(
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
 
+    val pickImage = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { imageUri ->
+        if (imageUri != null) {
+            imagePath = noteViewModel.savePhoto(imageUri)
+        }
+    }
+
     val permissionlauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
             if (it) {
-                scope.launch {
-                    scaffoldState.snackbarHostState.showSnackbar("已授权")
-                }
+                pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             } else {
                 scope.launch {
                     scaffoldState.snackbarHostState.showSnackbar("未授权")
                 }
             }
         }
-
-    val pickImage = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-    ) {
-        imagePath = ImageUtils.getPathFromUri(it, context.contentResolver)
-    }
 
     BottomSheetScaffold(
         sheetContent = {
