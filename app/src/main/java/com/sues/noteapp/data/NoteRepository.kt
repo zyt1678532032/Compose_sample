@@ -6,8 +6,6 @@ import com.sues.noteapp.data.local.Note
 
 interface NoteRepository {
 
-    val context: Context
-
     suspend fun getAllNote(): List<Note>
 
     suspend fun findNoteById(id: Int): Note?

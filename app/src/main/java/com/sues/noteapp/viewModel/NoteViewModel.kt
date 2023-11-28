@@ -1,11 +1,12 @@
 package com.sues.noteapp.viewModel
 
+import android.app.Application
+import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sues.noteapp.data.NoteRepository
 import com.sues.noteapp.data.local.Note
@@ -15,9 +16,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
+// 如果要在ViewModel中使用Context, 可以使用AndroidViewModel
 class NoteViewModel(
+    application: Application,
     private val noteRepository: NoteRepository
-) : ViewModel() {
+) : AndroidViewModel(application) {
+
+    private val content: Context
+        get() = getApplication()
 
     /// region UiState
     data class UiState(
@@ -36,12 +42,12 @@ class NoteViewModel(
         private set
 
     // /data/user/0/com.sues.noteapp/cache/photos
-    private val _photoFolder = File(noteRepository.context.cacheDir, "photos").also { it.mkdir() }
+    private val _photoFolder = File(content.cacheDir, "photos").also { it.mkdir() }
 
 
     fun savePhoto(photoUri: Uri): String {
         val photo = genPhotoFile()
-        noteRepository.context.contentResolver.openInputStream(photoUri)?.use { input ->
+        content.contentResolver.openInputStream(photoUri)?.use { input ->
             photo.outputStream().use { output ->
                 input.copyTo(output)
             }

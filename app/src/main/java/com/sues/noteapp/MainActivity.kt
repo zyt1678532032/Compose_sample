@@ -20,9 +20,9 @@ class MainActivity : ComponentActivity() {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     return NoteViewModel(
+                        application = application,
                         noteRepository = NoteRepositoryImpl(
                             localDatasource = application.noteDatabase.noteDao(),
-                            context = applicationContext
                         )
                     ) as T
                 }
