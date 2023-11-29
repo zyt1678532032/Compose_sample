@@ -1,24 +1,41 @@
 package com.sues.noteapp.viewModel
 
-import android.app.Application
 import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
+import com.sues.noteapp.NoteApplication
 import com.sues.noteapp.data.NoteRepository
+import com.sues.noteapp.data.NoteRepositoryImpl
 import com.sues.noteapp.data.local.Note
+import com.sues.noteapp.noteDatabase
 import com.sues.noteapp.ui.theme.SelectedColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
+data class UiState(
+    val notes: List<Note> = emptyList(),
+
+    val clickedNote: Note? = null,
+
+    val title: String? = null,
+    val date: String? = null,
+    val content: String? = null,
+    val imagePath: String? = null,
+    val selectedColor: SelectedColor = SelectedColor.Color1
+)
+
 // 如果要在ViewModel中使用Context, 可以使用AndroidViewModel
 class NoteViewModel(
-    application: Application,
+    application: NoteApplication,
     private val noteRepository: NoteRepository
 ) : AndroidViewModel(application) {
 
@@ -26,18 +43,6 @@ class NoteViewModel(
         get() = getApplication()
 
     /// region UiState
-    data class UiState(
-        val notes: List<Note> = emptyList(),
-
-        val clickedNote: Note? = null,
-
-        val title: String? = null,
-        val date: String? = null,
-        val content: String? = null,
-        val imagePath: String? = null,
-        val selectedColor: SelectedColor = SelectedColor.Color1
-    )
-
     var uiState by mutableStateOf(UiState())
         private set
 
@@ -106,4 +111,19 @@ class NoteViewModel(
     }
     /// endregion
 
+    companion object {
+        val Factory = object : ViewModelProvider.AndroidViewModelFactory() {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                // Get the Application object from extras
+                val application = checkNotNull(extras[APPLICATION_KEY]) as NoteApplication
+                return NoteViewModel(
+                    application = application,
+                    noteRepository = NoteRepositoryImpl(
+                        localDatasource = application.noteDatabase.noteDao(),
+                    )
+                ) as T
+            }
+        }
+    }
 }
